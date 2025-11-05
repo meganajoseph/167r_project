@@ -1,0 +1,26 @@
+---
+title: "Report"
+format: pdf
+editor: visual
+---
+
+```{r}
+# change to match your path
+real_estate <- read.csv("C:\\Users\\megan\\OneDrive\\Documents\\math_167r\\167r_project\\Real_Estate_Sales_2001-2023_GL.csv")
+```
+
+## Descriptive Statistics
+
+### Over Entire Dataset
+
+| Statistics | Sale Price | Assessed Value | Sales Ratio |
+|----|----|----|----|
+| Mean | `r mean(real_estate$Sale.Amount)` | `r mean(real_estate$Assessed.Value)` | `r mean(real_estate$Sales.Ratio)` |
+| Min |  |  |  |
+| Max |  |  |  |
+| Mode |  |  |  |
+| 1st Quartile |  |  |  |
+| Median |  |  |  |
+| 3rd Quartile |  |  |  |
+
+## Graphs
