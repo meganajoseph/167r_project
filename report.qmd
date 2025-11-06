@@ -1,0 +1,13 @@
+---
+title: "Report"
+format: pdf
+editor: visual
+---
+
+## Introduction
+
+## Data
+
+## Graphs
+
+## Advanced Analysis

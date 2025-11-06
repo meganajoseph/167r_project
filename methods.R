@@ -1,5 +1,5 @@
 
-############################################# (Filtering out the non-residential properties)
+############################################ (Filtering out the non-residential properties)
 
 data <- read.csv("Real_Estate_2001-2023_GL.csv", sep = ",") #read csv file
 class(data) #check that it saved as data frame
