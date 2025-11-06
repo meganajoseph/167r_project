@@ -6,7 +6,10 @@ real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
 # take columns we want
 real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type")%>%
-  filter(!is.na(List.Year) & List.Year != "" & !is.na(Town) & Town != "" & !is.na(Assessed.Value) & Assessed.Value != "" & !is.na(Sale.Amount) & Sale.Amount != "" & !is.na(Sales.Ratio) & Sales.Ratio != "" & !is.na(Property.Type) & Property.Type != "" &!is.na(Residential.Type) & Residential.Type!="" )
+  filter(!is.na(List.Year) & List.Year != "" & !is.na(Town) & Town != "" & !is.na(Assessed.Value) & Assessed.Value != "" & !is.na(Sale.Amount) & Sale.Amount != "" & !is.na(Sales.Ratio) & Sales.Ratio != "" & !is.na(Property.Type) & Property.Type != "" &!is.na(Residential.Type) & Residential.Type!="" ) %>%
+  filter( Town == "Hartford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
+View(real_estate_simp)
+
 
 # clean data
 
