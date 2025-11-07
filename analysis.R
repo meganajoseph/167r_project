@@ -5,20 +5,38 @@ library(tidyverse)
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
 # take columns we want
-real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type")
+real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
+  filter(!is.na(List.Year) & List.Year != "" & 
+           !is.na(Town) & Town != "" & 
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Sales.Ratio) & Sales.Ratio != "" & 
+           !is.na(Property.Type) & Property.Type != "" &
+           !is.na(Residential.Type) & Residential.Type!="" ) %>%
+  filter( Town == "Hartford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
 
 # clean data
 # drop duplicates
 real_estate_dropped <- real_estate_simp[duplicated(real_estate_simp), ]
 
+# check the unique entries in Property Type column
+unique(real_estate_dropped$Property.Type) 
+# want to remove all of the irrelevant property types to our study (residential only)
+cleaned_real_estate <- real_estate_dropped[!real_estate_dropped$Property.Type %in% c("Industrial", "Commercial", "Vacant Land", "Public Utility", ""), ]
+# check that the irrelevant types are removed
+unique(cleaned_real_estate$Property.Type)
+
 # descriptive statistics over entire data set
-mean_sp <- mean(real_estate$Sale.Amount)
-mean_av <- mean(real_estate$Assessed.Value)
-mean_sr <- mean(real_estate$Sales.Ratio)
+mean_sp <- meane(cleaned_real_estate$Sale.Amount)
+mean_av <- mean(cleaned_real_estate$Assessed.Value)
+mean_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
 # min
 
 # max
+max_sp <- max(cleaned_real_estate$Sale.Amount)
+max_av <- max(cleaned_real_estate$Assessed.Value)
+max_sr <- max(cleaned_real_estate$Sales.Ratio)
 
 # 1st q
 
