@@ -17,7 +17,7 @@ real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value"
 
 # clean data
 # drop duplicates
-real_estate_dropped <- real_estate_simp[duplicated(real_estate_simp), ]
+real_estate_dropped <- real_estate_simp[!duplicated(real_estate_simp), ]
 
 # check the unique entries in Property Type column
 unique(real_estate_dropped$Property.Type) 
@@ -26,8 +26,11 @@ cleaned_real_estate <- real_estate_dropped[!real_estate_dropped$Property.Type %i
 # check that the irrelevant types are removed
 unique(cleaned_real_estate$Property.Type)
 
+# make sale.ratio numeric
+cleaned_real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+
 # descriptive statistics over entire data set
-mean_sp <- meane(cleaned_real_estate$Sale.Amount)
+mean_sp <- mean(cleaned_real_estate$Sale.Amount)
 mean_av <- mean(cleaned_real_estate$Assessed.Value)
 mean_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
