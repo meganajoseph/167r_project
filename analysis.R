@@ -5,16 +5,20 @@ library(tidyverse)
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
 # take columns we want
-real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type")
+real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type")%>%
+  filter(!is.na(List.Year) & List.Year != "" & !is.na(Town) & Town != "" & !is.na(Assessed.Value) & Assessed.Value != "" & !is.na(Sale.Amount) & Sale.Amount != "" & !is.na(Sales.Ratio) & Sales.Ratio != "" & !is.na(Property.Type) & Property.Type != "" &!is.na(Residential.Type) & Residential.Type!="" ) %>%
+  filter( Town == "Hartford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
+View(real_estate_simp)
+
 
 # clean data
 # drop duplicates
 real_estate_dropped <- real_estate_simp[duplicated(real_estate_simp), ]
 
 # descriptive statistics over entire data set
-mean_sp <- mean(real_estate$Sale.Amount)
-mean_av <- mean(real_estate$Assessed.Value)
-mean_sr <- mean(real_estate$Sales.Ratio)
+mean_sp <- mean(real_estate_simp$Sale.Amount)
+mean_av <- mean(real_estate_simp$Assessed.Value)
+mean_sr <- mean(real_estate_simp$Sales.Ratio)
 
 # min
 
