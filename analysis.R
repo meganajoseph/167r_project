@@ -46,3 +46,27 @@ max_sr <- max(cleaned_real_estate$Sales.Ratio)
 # median
 
 # 3rd q
+
+
+# graphs
+
+# visualize number of entries in each town
+ggplot(data=cleaned_real_estate, aes(Town)) +
+  geom_bar() + 
+  labs(x = "Town",
+       y = "Frequency",
+       title = "Number of observations for each town of interest") 
+
+# visualize number of entries in each residential type
+ggplot(data=cleaned_real_estate, aes(Residential.Type)) +
+  geom_bar() + 
+  labs(x = "Residential Type",
+       y = "Frequency",
+       title = "Number of observations for each residential type") 
+
+# visualize the distribution of sale price
+ggplot(data=cleaned_real_estate, aes(Sale.Amount)) +
+  geom_histogram(bins=20) + 
+  labs(x = "Sale Price",
+       y = "Frequency",
+       title = "Distribution of sale price") 
