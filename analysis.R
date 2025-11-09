@@ -98,4 +98,411 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
        y = "Average Sales Ratio",
        color = "Town")+
   theme_minimal()
+
+# generate biannual boxplots (with some redundant functions for now, will consolidate later)
+
+unique(data$Property.Type) #check the unique entries in Property Type column
+data_clean <- data[!data$Property.Type %in% c("Industrial", "Commercial", "Vacant Land", "Public Utility", ""), ]
+
+
+#pdf hartford
+
+# Ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+# prepare list of boxplot data
+boxplot_data <- list()
+valid_labels <- c()
+
+for (i in seq_along(intervals)) {
+  y <- intervals[i]
+  years_interval <- y:min(y+1, end_year)
   
+  # subset hartford data
+  data_subset <- data_clean[data_clean$Town == "Hartford" & data_clean$List.Year %in% years_interval, ]
+  sales <- na.omit(data_subset$Sale.Amount)
+  
+  if (length(sales) > 0) {
+    boxplot_data[[length(boxplot_data) + 1]] <- sales
+    valid_labels <- c(valid_labels, interval_labels[i])
+  }
+}
+
+if (length(boxplot_data) == 0) stop("No Sale.Amount data found for Hartford.")
+
+# set consistent y-axis limits
+y_limits <- range(unlist(boxplot_data))
+
+# open pdf
+pdf("Hartford_SaleAmounts_2yr_pairs.pdf", width = 10, height = 12)
+
+# set up 2 columns and enough rows to fit all intervals
+n <- length(boxplot_data)
+rows <- ceiling(n / 2)
+par(mfrow = c(rows, 2), mar = c(4, 4, 3, 1))  # adjust margins
+
+# plot each interval
+for (i in seq_along(boxplot_data)) {
+  boxplot(boxplot_data[[i]],
+          main = valid_labels[i],
+          ylab = "Sale Amount",
+          col = "lightblue",   # different color for Hartford
+          ylim = y_limits)
+}
+
+dev.off()
+
+#westport
+
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+# prepare list of boxplot data
+boxplot_data <- list()
+valid_labels <- c()
+
+for (i in seq_along(intervals)) {
+  y <- intervals[i]
+  years_interval <- y:min(y+1, end_year)
+  
+  # subset westport data
+  data_subset <- data_clean[data_clean$Town == "Westport" & data_clean$List.Year %in% years_interval, ]
+  sales <- na.omit(data_subset$Sale.Amount)
+  
+  if (length(sales) > 0) {
+    boxplot_data[[length(boxplot_data) + 1]] <- sales
+    valid_labels <- c(valid_labels, interval_labels[i])
+  }
+}
+
+if (length(boxplot_data) == 0) stop("No Sale.Amount data found for Westport.")
+
+# set consistent y-axis limits
+y_limits <- range(unlist(boxplot_data))
+
+# open pdf
+pdf("Westport_SaleAmounts_2yr_pairs.pdf", width = 10, height = 12)
+
+# set up 2 columns and enough rows to fit all intervals
+n <- length(boxplot_data)
+rows <- ceiling(n / 2)
+par(mfrow = c(rows, 2), mar = c(4, 4, 3, 1))  # adjust margins
+
+# plot each interval
+for (i in seq_along(boxplot_data)) {
+  boxplot(boxplot_data[[i]],
+          main = valid_labels[i],
+          ylab = "Sale Amount",
+          col = "lightgreen",   # color for Westport
+          ylim = y_limits)
+}
+
+dev.off()
+
+#cheshire
+
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+# prepare list of boxplot data
+boxplot_data <- list()
+valid_labels <- c()
+
+for (i in seq_along(intervals)) {
+  y <- intervals[i]
+  years_interval <- y:min(y+1, end_year)
+  
+  # subset cheshire data for this interval
+  data_subset <- data_clean[data_clean$Town == "Cheshire" & data_clean$List.Year %in% years_interval, ]
+  sales <- na.omit(data_subset$Sale.Amount)
+  
+  if (length(sales) > 0) {
+    boxplot_data[[length(boxplot_data) + 1]] <- sales
+    valid_labels <- c(valid_labels, interval_labels[i])
+  }
+}
+
+if (length(boxplot_data) == 0) stop("No Sale.Amount data found for Cheshire.")
+
+# set consistent y-axis limits
+y_limits <- range(unlist(boxplot_data))
+
+# open pdf
+pdf("Cheshire_SaleAmounts_2yr_pairs.pdf", width = 10, height = 12)
+
+# set up 2 columns and enough rows to fit all intervals
+n <- length(boxplot_data)
+rows <- ceiling(n / 2)
+par(mfrow = c(rows, 2), mar = c(4, 4, 3, 1))  # adjust margins
+
+# plot each interval
+for (i in seq_along(boxplot_data)) {
+  boxplot(boxplot_data[[i]],
+          main = valid_labels[i],
+          ylab = "Sale Amount",
+          col = "pink",   # color for Cheshire
+          ylim = y_limits)
+}
+
+dev.off()
+
+###sprague
+
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+# prepare list of boxplot data
+boxplot_data <- list()
+valid_labels <- c()
+
+for (i in seq_along(intervals)) {
+  y <- intervals[i]
+  years_interval <- y:min(y+1, end_year)
+  
+  # subset sprague data for this interval
+  data_subset <- data_clean[data_clean$Town == "Sprague" & data_clean$List.Year %in% years_interval, ]
+  sales <- na.omit(data_subset$Sale.Amount)
+  
+  if (length(sales) > 0) {
+    boxplot_data[[length(boxplot_data) + 1]] <- sales
+    valid_labels <- c(valid_labels, interval_labels[i])
+  }
+}
+
+if (length(boxplot_data) == 0) stop("No Sale.Amount data found for Sprague.")
+
+# set consistent y-axis limits
+y_limits <- range(unlist(boxplot_data))
+
+# open pdf
+pdf("Sprague_SaleAmounts_2yr_pairs.pdf", width = 10, height = 12)
+
+# set up 2 columns and enough rows to fit all intervals
+n <- length(boxplot_data)
+rows <- ceiling(n / 2)
+par(mfrow = c(rows, 2), mar = c(4, 4, 3, 1))  # adjust margins
+
+# plot each interval
+for (i in seq_along(boxplot_data)) {
+  boxplot(boxplot_data[[i]],
+          main = valid_labels[i],
+          ylab = "Sale Amount",
+          col = "lightgoldenrod",   # color for Sprague
+          ylim = y_limits)
+}
+
+dev.off()
+
+
+#####side by side with labels
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# towns and colors
+towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+for (t_index in seq_along(towns)) {
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  # prepare data: one list per interval
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y+1, end_year)
+    
+    data_subset <- data_clean[data_clean$Town == town & data_clean$List.Year %in% years_interval, ]
+    sales <- na.omit(data_subset$Sale.Amount)
+    
+    if (length(sales) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- sales
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No Sale.Amount data found for", town))
+    next
+  }
+  
+  # determine y-axis limits
+  y_limits <- range(unlist(boxplot_data))
+  
+  # open pdf
+  pdf_filename <- paste0(town, "_SaleAmounts_2yr_trend.pdf")
+  pdf(pdf_filename, width = 12, height = 6)
+  
+  # single boxplot with all intervals side by side
+  boxplot(boxplot_data,
+          names = valid_labels,
+          col = col,
+          ylim = y_limits,
+          las = 2,          # vertical x-axis labels
+          ylab = "Sale Amount",
+          main = paste("Sale Amount Trends -", town))
+  
+  dev.off()
+  cat("PDF created for", town, ":", pdf_filename, "\n")
+}
+
+######## side by side assessed values
+
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Assessed.Value <- as.numeric(data_clean$Assessed.Value)
+
+# towns and colors
+towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+for (t_index in seq_along(towns)) {
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  # prepare data: one list per interval
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y+1, end_year)
+    
+    data_subset <- data_clean[data_clean$Town == town & data_clean$List.Year %in% years_interval, ]
+    values <- na.omit(data_subset$Assessed.Value)
+    
+    if (length(values) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- values
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No Assessed.Value data found for", town))
+    next
+  }
+  
+  # determine y-axis limits
+  y_limits <- range(unlist(boxplot_data))
+  
+  # open PDF
+  pdf_filename <- paste0(town, "_AssessedValues_2yr_trend.pdf")
+  pdf(pdf_filename, width = 12, height = 6)
+  
+  # single boxplot with all intervals side by side
+  boxplot(boxplot_data,
+          names = valid_labels,
+          col = col,
+          ylim = y_limits,
+          las = 2,          # vertical x-axis labels
+          ylab = "Assessed Value",
+          main = paste("Assessed Value Trends -", town))
+  
+  dev.off()
+  cat("PDF created for", town, ":", pdf_filename, "\n")
+}
+
+################ sales ratio
+
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sales.Ratio <- as.numeric(data_clean$Sales.Ratio)
+
+# towns and colors
+towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y+1, end_year)))
+
+for (t_index in seq_along(towns)) {
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  # prepare data: one list per interval
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y+1, end_year)
+    
+    data_subset <- data_clean[data_clean$Town == town & data_clean$List.Year %in% years_interval, ]
+    values <- na.omit(data_subset$Sales.Ratio)
+    
+    if (length(values) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- values
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No Sales.Ratio data found for", town))
+    next
+  }
+  
+  # ddetermine y-axis limits
+  y_limits <- range(unlist(boxplot_data))
+  
+  # open pdf
+  pdf_filename <- paste0(town, "_SalesRatio_2yr_trend.pdf")
+  pdf(pdf_filename, width = 12, height = 6)
+  
+  # single boxplot with all intervals side by side
+  boxplot(boxplot_data,
+          names = valid_labels,
+          col = col,
+          ylim = y_limits,
+          las = 2,          # vertical x-axis labels
+          ylab = "Sales Ratio",
+          main = paste("Sales Ratio Trends -", town))
+  
+  dev.off()
+  cat("PDF created for", town, ":", pdf_filename, "\n")
+}
