@@ -1,5 +1,6 @@
 # import libraries
 library(tidyverse)
+library(ggplot2)
 
 # import data
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
@@ -35,6 +36,9 @@ mean_av <- mean(cleaned_real_estate$Assessed.Value)
 mean_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
 # min
+min_sp <- mean(cleaned_real_estate$Sale.Amount)
+min_av <- mean(cleaned_real_estate$Assessed.Value)
+min_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
 # max
 max_sp <- max(cleaned_real_estate$Sale.Amount)
@@ -42,11 +46,19 @@ max_av <- max(cleaned_real_estate$Assessed.Value)
 max_sr <- max(cleaned_real_estate$Sales.Ratio)
 
 # 1st q
+first_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.25)
+first_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.25)
+first_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.25)
 
 # median
+median_sp <- mean(cleaned_real_estate$Sale.Amount)
+median_av <- mean(cleaned_real_estate$Assessed.Value)
+median_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
 # 3rd q
-
+first_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
+first_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.75)
+first_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
 
 # graphs
 
@@ -70,3 +82,20 @@ ggplot(data=cleaned_real_estate, aes(Sale.Amount)) +
   labs(x = "Sale Price",
        y = "Frequency",
        title = "Distribution of sale price") 
+
+# visualize the sales ratio among towns across years
+ratio_df <- cleaned_real_estate %>% 
+  group_by(Town, List.Year) %>%
+  summarise(mean_sr_ingroup = mean(Sales.Ratio, na.rm = TRUE))
+  
+ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = unique(ratio_df$List.Year))+
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  labs(title = "Average sales ratio by town",
+       x = "Year", 
+       y = "Average Sales Ratio",
+       color = "Town")+
+  theme_minimal()
+  
