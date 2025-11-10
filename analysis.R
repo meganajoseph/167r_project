@@ -17,7 +17,7 @@ real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value"
            !is.na(Sales.Ratio) & Sales.Ratio != "" & 
            !is.na(Property.Type) & Property.Type != "" &
            !is.na(Residential.Type) & Residential.Type!="" ) %>%
-  filter( Town == "Hartford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
+  filter( Town == "Stamford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
 
 # drop duplicates
 real_estate_dropped <- real_estate_simp[!duplicated(real_estate_simp), ]
@@ -55,9 +55,9 @@ first_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.25)
 first_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.25)
 
 # median
-median_sp <- mean(cleaned_real_estate$Sale.Amount)
-median_av <- mean(cleaned_real_estate$Assessed.Value)
-median_sr <- mean(cleaned_real_estate$Sales.Ratio)
+median_sp <- median(cleaned_real_estate$Sale.Amount)
+median_av <- median(cleaned_real_estate$Assessed.Value)
+median_sr <- median(cleaned_real_estate$Sales.Ratio)
 
 # 3rd q
 first_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
@@ -81,9 +81,10 @@ ggplot(data=cleaned_real_estate, aes(Residential.Type)) +
        title = "Number of observations for each residential type") 
 
 # visualize the distribution of sale price
-ggplot(data=cleaned_real_estate, aes(Sale.Amount)) +
+# add caption explaining log values
+ggplot(data=cleaned_real_estate, aes(log(Sale.Amount))) +
   geom_histogram(bins=20) + 
-  labs(x = "Sale Price",
+  labs(x = "Log Sale Price",
        y = "Frequency",
        title = "Distribution of sale price") 
 
@@ -104,7 +105,7 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
   theme_minimal()
 
 # generate biannual boxplots (with some redundant functions for now, will consolidate later)
-
+data <- real_estate
 unique(data$Property.Type) #check the unique entries in Property Type column
 data_clean <- data[!data$Property.Type %in% c("Industrial", "Commercial", "Vacant Land", "Public Utility", ""), ]
 
@@ -491,7 +492,7 @@ for (t_index in seq_along(towns)) {
     next
   }
   
-  # ddetermine y-axis limits
+  # determine y-axis limits
   y_limits <- range(unlist(boxplot_data))
   
   # open pdf
@@ -510,3 +511,23 @@ for (t_index in seq_along(towns)) {
   dev.off()
   cat("PDF created for", town, ":", pdf_filename, "\n")
 }
+
+
+
+# advanced analysis
+locations <- real_estate %>% select("Assessed.Value", "Sale.Amount", "Sales.Ratio", "Location") %>%
+  filter(!is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Sales.Ratio) & Sales.Ratio != "" & 
+           !is.na(Location) & Location != "")
+
+loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
+loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
+loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split <- loc_split %>% 
+  select("Assessed.Value", "Sale.Amount", "Sales.Ratio", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 43 & Longitude > 40)
+
+ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
+  stat_summary_2d(fun = mean, bins = 20) +
+  scale_fill_gradient(low="white", high="darkgreen", name="Sale Price")

@@ -1,2 +1,5 @@
 Real_Estate_Sales_2001-2023_GL.csv
 .Rproj.user
+.RData
+.Rhistory
+*.pdf
