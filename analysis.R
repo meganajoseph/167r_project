@@ -515,19 +515,32 @@ for (t_index in seq_along(towns)) {
 
 
 # advanced analysis
-locations <- real_estate %>% select("Assessed.Value", "Sale.Amount", "Sales.Ratio", "Location") %>%
-  filter(!is.na(Assessed.Value) & Assessed.Value != "" & 
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+  filter(!is.na(Town) & Town != "" &
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
            !is.na(Sale.Amount) & Sale.Amount != "" & 
-           !is.na(Sales.Ratio) & Sales.Ratio != "" & 
            !is.na(Location) & Location != "")
 
 loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
 loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
 loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
 loc_split <- loc_split %>% 
-  select("Assessed.Value", "Sale.Amount", "Sales.Ratio", "Latitude", "Longitude") %>%
-  filter(Latitude < -69 & Latitude > -74 & Longitude < 43 & Longitude > 40)
+  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
 
 ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
-  stat_summary_2d(fun = mean, bins = 20) +
-  scale_fill_gradient(low="white", high="darkgreen", name="Sale Price")
+  stat_summary_2d(fun = median, bins = 40) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
+  labs(title="Density of Sale Price in Connecticut")
+
+ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Assessed.Value)) +
+  stat_summary_2d(fun = median, bins = 40) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Assessed Value") +
+  labs(title="Density of Assessed Value in Connecticut")
+
+# hartford heatmap
+cheshire <- loc_split[loc_split$Town == "Cheshire",]
+ggplot(cheshire, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
+  stat_summary_2d(fun = median, bins = 50) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
+  labs(title="Density of Sale Price in Cheshire")
