@@ -4,6 +4,9 @@ library(tidyverse)
 # import data
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
+
+
+# clean data
 # take columns we want
 real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
   filter(!is.na(List.Year) & List.Year != "" & 
@@ -15,7 +18,6 @@ real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value"
            !is.na(Residential.Type) & Residential.Type!="" ) %>%
   filter( Town == "Hartford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
 
-# clean data
 # drop duplicates
 real_estate_dropped <- real_estate_simp[!duplicated(real_estate_simp), ]
 
@@ -28,6 +30,8 @@ unique(cleaned_real_estate$Property.Type)
 
 # make sale.ratio numeric
 cleaned_real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+
+
 
 # descriptive statistics over entire data set
 mean_sp <- mean(cleaned_real_estate$Sale.Amount)
