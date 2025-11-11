@@ -514,7 +514,7 @@ for (t_index in seq_along(towns)) {
 
 
 
-# advanced analysis
+# geographical heatmap
 locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
   filter(!is.na(Town) & Town != "" &
            !is.na(Assessed.Value) & Assessed.Value != "" & 
