@@ -40,9 +40,9 @@ mean_av <- mean(cleaned_real_estate$Assessed.Value)
 mean_sr <- mean(cleaned_real_estate$Sales.Ratio)
 
 # min
-min_sp <- mean(cleaned_real_estate$Sale.Amount)
-min_av <- mean(cleaned_real_estate$Assessed.Value)
-min_sr <- mean(cleaned_real_estate$Sales.Ratio)
+min_sp <- min(cleaned_real_estate$Sale.Amount)
+min_av <- min(cleaned_real_estate$Assessed.Value)
+min_sr <- min(cleaned_real_estate$Sales.Ratio)
 
 # max
 max_sp <- max(cleaned_real_estate$Sale.Amount)
@@ -60,9 +60,9 @@ median_av <- median(cleaned_real_estate$Assessed.Value)
 median_sr <- median(cleaned_real_estate$Sales.Ratio)
 
 # 3rd q
-first_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
-first_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.75)
-first_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
+third_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
+third_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.75)
+third_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
 
 # graphs
 
