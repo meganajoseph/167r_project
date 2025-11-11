@@ -544,3 +544,20 @@ ggplot(cheshire, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
   labs(title="Density of Sale Price in Cheshire")
+
+# advanced analysis
+# regression model
+SS_model <- lm(formula =  Sale.Amount ~ Assessed.Value * Town, data = cleaned_real_estate)
+summary(SS_model)
+SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
+summary(SS_model_log)
+
+ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
+  geom_point(size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  labs(title = "Interaction",
+       x = "Log assessed value",
+       y = "Log sale amount") +
+  theme_minimal()+
+  facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
+
