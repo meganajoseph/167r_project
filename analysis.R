@@ -528,10 +528,19 @@ loc_split <- loc_split %>%
   select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
   filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
 
+
+new_dir <- "graphs/heatmaps"
+if (!dir.exists(new_dir)) {
+  dir.create(new_dir, recursive = TRUE)
+}
+
+pdf_path <- file.path(new_dir, "sale_price_ct.pdf")
+pdf(pdf_path) 
 ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
   stat_summary_2d(fun = median, bins = 40) +
   scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
   labs(title="Density of Sale Price in Connecticut")
+dev.off()
 
 ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Assessed.Value)) +
   stat_summary_2d(fun = median, bins = 40) +
