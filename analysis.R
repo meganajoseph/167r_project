@@ -5,6 +5,9 @@ library(ggplot2)
 # import data
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
+# make sale.ratio numeric
+real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+
 
 
 # clean data
@@ -29,8 +32,6 @@ cleaned_real_estate <- real_estate_dropped[!real_estate_dropped$Property.Type %i
 # check that the irrelevant types are removed
 unique(cleaned_real_estate$Property.Type)
 
-# make sale.ratio numeric
-cleaned_real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
 
 
 
