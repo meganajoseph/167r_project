@@ -15,8 +15,8 @@ real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
 real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
   filter(!is.na(List.Year) & List.Year != "" & 
            !is.na(Town) & Town != "" & 
-           !is.na(Assessed.Value) & Assessed.Value != "" & 
-           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Assessed.Value) & Assessed.Value != "" &
+           !is.na(Sale.Amount) & Sale.Amount != "" & Sale.Amount >= 2000 &
            !is.na(Sales.Ratio) & Sales.Ratio != "" & 
            !is.na(Property.Type) & Property.Type != "" &
            !is.na(Residential.Type) & Residential.Type!="" ) %>%
@@ -846,6 +846,42 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
   labs(title = "Interaction",
        x = "Log assessed value",
        y = "Log sale amount") +
-  theme_minimal()+
   facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
 
+#assumption
+mod_residuals <- residuals(SS_model_log)
+mod_fitted <- fitted(SS_model_log)
+ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
+  geom_qq() +
+  geom_qq_line() +
+  xlab("Theoretical quantile (Normal distribution)") +
+  ylab("Sample quantile") + 
+  ggtitle("Quantile-quantile plot of residuals")
+
+#residual histogram
+ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
+  geom_histogram(bins = 30, fill = "lightyellow", color = "black", alpha = 0.7) +
+  labs(title = "residual histogram",
+       x = "residual",
+       y = "frequency")
+
+
+resid_dataframe <- data.frame(time = 1:length(residuals(SS_model_log)),
+                            resid = residuals(SS_model_log),
+                            fittedvalue = fitted(SS_model_log))
+#make the redisual& Time plot
+ggplot(resid_dataframe1, aes(x = time,y = resid))+
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  ylab("Residual value") +
+  xlab("Time") + 
+  ggtitle("Residual vs. Time")
+
+#make the redisual& fitted plot
+
+ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  ylab("Residual value") +
+  xlab("Fitted value") + 
+  ggtitle("Residual vs. fitted value")
