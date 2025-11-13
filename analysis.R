@@ -65,6 +65,8 @@ third_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
 third_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.75)
 third_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
 
+
+
 # graphs
 
 # visualize number of entries in each town
@@ -87,7 +89,7 @@ ggplot(data=cleaned_real_estate, aes(log(Sale.Amount))) +
   geom_histogram(bins=20) + 
   labs(x = "Log Sale Price",
        y = "Frequency",
-       title = "Distribution of sale price") 
+       title = "Distribution of log of sale price") 
 
 # visualize the sales ratio among towns across years
 ratio_df <- cleaned_real_estate %>% 
