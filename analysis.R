@@ -5,12 +5,12 @@ library(ggplot2)
 # import data
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
-# make sale.ratio numeric
-real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
-
 
 
 # clean data
+# make sale.ratio numeric
+real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+
 # take columns we want
 real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
   filter(!is.na(List.Year) & List.Year != "" & 
@@ -834,6 +834,7 @@ str(loc_split)
 
 # advanced analysis
 # regression model
+# check assumptions are met, errors are mo
 SS_model <- lm(formula =  Sale.Amount ~ Assessed.Value * Town, data = cleaned_real_estate)
 summary(SS_model)
 SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
