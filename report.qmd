@@ -1,13 +1,377 @@
 ---
-title: "Report"
+title: "Analysis of Residential Real Esatate Data From Connecticut"
+author: "Siling Guo, Megan Joseph, John Sawicz"
+thanks: "Project repository available at: [https://github.com/meganajoseph/167r_project](https://github.com/meganajoseph/167r_project)."
+date: today
+date-format: long
+abstract: ""
 format: pdf
 editor: visual
+bibliography: references.bib
+number-sections: true
 ---
 
-## Introduction
+# Introduction
 
-## Data
+# Data
 
-## Graphs
+```{r}
+#| include: false
+#| warning: false
+#| message: false
 
-## Advanced Analysis
+# import libraries
+library(tidyverse)
+library(ggplot2)
+library(ggpubr)
+library(patchwork)
+
+# import data
+real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
+
+# clean data
+# take columns we want
+real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
+  filter(!is.na(List.Year) & List.Year != "" & 
+           !is.na(Town) & Town != "" & 
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Sales.Ratio) & Sales.Ratio != "" & 
+           !is.na(Property.Type) & Property.Type != "" &
+           !is.na(Residential.Type) & Residential.Type!="" ) %>%
+  filter( Town == "Stamford" | Town == "Westport" | Town == "Cheshire" | Town == "Sprague")
+
+# drop duplicates
+real_estate_dropped <- real_estate_simp[!duplicated(real_estate_simp), ]
+
+# check the unique entries in Property Type column
+unique(real_estate_dropped$Property.Type) 
+# want to remove all of the irrelevant property types to our study (residential only)
+cleaned_real_estate <- real_estate_dropped[!real_estate_dropped$Property.Type %in% c("Industrial", "Commercial", "Vacant Land", "Public Utility", ""), ]
+# check that the irrelevant types are removed
+unique(cleaned_real_estate$Property.Type)
+
+# make sale.ratio numeric
+cleaned_real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+```
+
+The data we used for this analysis is Real Estate Sales data from 2001-2023 from the State of Connecticut's Office of Policy and Management. The sale price of each property is at least \$2,000. Each row is a property which contains information of the town, address, date sold, property type (residential, apartment, commercial, industrial or vacant land), sale price, assessed value, and latitude and longitude coordinates. For the purposes of this analysis, we mainly focus on residential properties and the columns town, property type, sale price, assessed value, and coordinates. Additionally, we picked four cities to focus on: Stamford, Westport, Cheshire, and Sprague. This was done because of the large number of data points and to investigate any differences in towns with varying levels of median income. Westport, CT has the highest median income at \$250,001, then we picked Cheshire, CT at \$150,787 for upper middle, Stamford, CT for lower middle, and Sprague, CT for the lowest. We also wanted to sample towns with different populations and densities. [@Data_Commons].
+
+## Data Cleaning
+
+Many of the data points were missing or were empty characters, so we dropped those rows. Since our goal is centered on residential properties, we filtered out rows that were not residential. Additionally, the Sales.Ratio column needed to be transformed into a numeric value.
+
+## Descriptive Statistics
+
+We analyzed the mean, minimum value, maximum value, first quantile, median, and third quantile of the Sale.Amount, Assessed.Value, and Sales.Ratio columns. The information is summarized in the table below.
+
+```{r}
+#| include: false
+#| warning: false
+#| message: false
+
+# descriptive statistics over entire data set
+mean_sp <- mean(cleaned_real_estate$Sale.Amount)
+mean_av <- mean(cleaned_real_estate$Assessed.Value)
+mean_sr <- mean(cleaned_real_estate$Sales.Ratio)
+
+# min
+min_sp <- min(cleaned_real_estate$Sale.Amount)
+min_av <- min(cleaned_real_estate$Assessed.Value)
+min_sr <- min(cleaned_real_estate$Sales.Ratio)
+
+# max
+max_sp <- max(cleaned_real_estate$Sale.Amount)
+max_av <- max(cleaned_real_estate$Assessed.Value)
+max_sr <- max(cleaned_real_estate$Sales.Ratio)
+
+# 1st q
+first_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.25)
+first_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.25)
+first_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.25)
+
+# median
+median_sp <- median(cleaned_real_estate$Sale.Amount)
+median_av <- median(cleaned_real_estate$Assessed.Value)
+median_sr <- median(cleaned_real_estate$Sales.Ratio)
+
+# 3rd q
+third_quantile_sp <- quantile(cleaned_real_estate$Sale.Amount, probs = 0.75)
+third_quantile_av <- quantile(cleaned_real_estate$Assessed.Value, probs = 0.75)
+third_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
+```
+
+| Column | Mean | Minimum | Maximum | 1st Quartile | Median | 3rd Quartile |
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
+| Sale Amount | `r signif(mean_sp, digits=2)` | `r min_sp` | `r max_sp` | `r round(first_quantile_sp, 2)` | `r round(median_sp, 2)` | `r round(third_quantile_sp, 2)` |
+| Assessed Value | `r signif(mean_av, digits=2)` | `r min_av` | `r signif(max_av, 2)` | `r signif(first_quantile_av, digits=2)` | `r signif(median_av, digits=2)` | `r signif(third_quantile_av, digits=2)` |
+| Sales Ratio | `r round(mean_sr, 2)` | `r min_sr` | `r round(max_sr, 2)` | `r round(first_quantile_sr, 2)` | `r round(median_sr, 2)` | `r round(third_quantile_sr, 2)` |
+
+# Graphs
+
+## Categorical
+
+We created bar plots to see the number of entries per town of interest and per residential type.
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "The plot of the left shows that the number of observations is greatest for Stamford and lowest for Sprague. The plot of the right shows that There are more entires for Single Family and Condo properties and very few for Two Family, Three Family, and Four Family."
+
+par(mfrow=c(1, 2))
+# visualize number of entries in each town
+town <- ggplot(data=cleaned_real_estate, aes(Town)) +
+  geom_bar() + 
+  labs(x = "Town",
+       y = "Frequency",
+       title = "Number of observations\nfor each town of interest") +
+  theme(axis.text.x=element_text(angle=90))
+
+# visualize number of entries in each residential type
+res_type <- ggplot(data=cleaned_real_estate, aes(Residential.Type)) +
+  geom_bar() + 
+  labs(x = "Residential Type",
+       y = "Frequency",
+       title = "Number of observations\nfor each residential type") +
+  theme(axis.text.x=element_text(angle=90))
+
+town + res_type
+```
+
+Since Stamford is a big city with a large population, it makes sense for it to have the most entries. On the other hand, Sprague is the opposite as a small town with a small population which accounts for the low amount of sales. Most housing are Single Family or Condos. It is rare to see Two Family and above sized homes being built.
+
+## Continuous
+
+### Distribution of Sale Price
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Sale price seems to  be centered at around $$e^{13}$."
+
+# visualize the distribution of sale price
+# add caption explaining log values
+ggplot(data=cleaned_real_estate, aes(log(Sale.Amount))) +
+  geom_histogram(bins=20) + 
+  labs(x = "Log Sale Price",
+       y = "Frequency",
+       title = "Distribution of the log of sale price") 
+```
+
+We took the log of the sale price because it is extremely right skewed otherwise. We see that the data is centered at around \$$e^{13} \approx \$442,413$. 
+
+### Box Plots By Town
+
+We constructed a series of boxplots and scatterplots for each of our continuous variables (sale price, assessed value, and sales ratio), and then repeating this step for each of the four towns selected (Stamford, Westport, Cheshire, and Sprague). We decided that aligning the boxplots vertically and then sorting them in time order would effectively demonstrate trends over time in a more effective manner.
+
+Sales Amounts:
+
+![](images/Stamford_SaleAmounts_2yr_trend.jpg)
+
+We are still combing through the upper end of the Sale Amount column for errors. In a dataset this large, there are bound to be mistakes which lead to unreasonable figures which deserve to be deleted.
+
+![](images/Westport_SaleAmounts_2yr_trend.jpg)
+
+Here we see some evidence of national and regional property market trends in a very right skewed town. The large number of outliers, some of which are priced rather high, speaks to a desirable coastal community within easy commuting distance of New York City. Notice the rapid outlier rebound after the 2008 financial crisis.
+
+![](images/Cheshire_SaleAmounts_2yr_trend-01.jpg)
+
+Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the man quartiles, not really rebounding until the Covid-19 pandemic. It is farther away from major metropolitan areas and the coast, with a smaller population. It appeals to buyers with more modest means.
+
+![](images/Sprague_SaleAmounts_2yr_trend-01.jpg)
+
+Sprague, the smallest of the towns we chose, displayed more year to year variability and a great deal more market driven variability than larger towns. Part of that is likely due to lower sales volume, and perhaps since it is less prosperous it was a relative bargain and accessible to more buyers.
+
+Assessed Values:
+
+![](images/Stamford_AssessedValues_2yr_trend.jpeg)
+
+![](images/Westport_AssessedValues_2yr_trend.jpeg)
+
+![](images/Cheshire_AssessedValues_2yr_trend.jpeg)
+
+![](images/Sprague_AssessedValues_2yr_trend.jpeg)
+
+Sales Ratio:
+
+# Advanced Analysis
+
+```{r}
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+  filter(!is.na(Town) & Town != "" &
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Location) & Location != "")
+
+loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
+loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
+loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split <- loc_split %>% 
+  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
+
+
+new_dir <- "graphs/heatmaps"
+if (!dir.exists(new_dir)) {
+  dir.create(new_dir, recursive = TRUE)
+}
+#swap latitude longitude
+temp <- loc_split$Latitude
+loc_split$Latitude <- loc_split$Longitude
+loc_split$Longitude <- temp
+
+stamford <- loc_split[loc_split$Town == "Stamford",]
+
+stamford_filtered <- loc_split[
+  loc_split$Town == "Stamford" &
+    loc_split$Latitude >= 41 & loc_split$Latitude <= 42 &
+    loc_split$Longitude >= -73.6 & loc_split$Longitude <= -73.4,
+]
+
+
+ggplot(stamford_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
+  stat_summary_2d(fun = median, bins = 50) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
+  labs(title="Density of Sale Price in Stamford")
+
+nrow(stamford)
+unique(loc_split$Town)
+head(loc_split[loc_split$Town=='Stamford',])
+
+str(loc_split)
+```
+
+```{r}
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+  filter(!is.na(Town) & Town != "" &
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Location) & Location != "")
+
+loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
+loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
+loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split <- loc_split %>% 
+  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
+
+
+new_dir <- "graphs/heatmaps"
+if (!dir.exists(new_dir)) {
+  dir.create(new_dir, recursive = TRUE)
+}
+#swap latitude longitude
+temp <- loc_split$Latitude
+loc_split$Latitude <- loc_split$Longitude
+loc_split$Longitude <- temp
+
+cheshire <- loc_split[loc_split$Town == "Cheshire",]
+
+cheshire_filtered <- loc_split[
+  loc_split$Town == "Cheshire" &
+    loc_split$Latitude >= 41.4 & loc_split$Latitude <= 41.6 &
+    loc_split$Longitude >= -73 & loc_split$Longitude <= -72.75,
+]
+
+
+ggplot(cheshire_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
+  stat_summary_2d(fun = median, bins = 50) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
+  labs(title="Density of Sale Price in Cheshire")
+```
+
+```{r}
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+  filter(!is.na(Town) & Town != "" &
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Location) & Location != "")
+
+loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
+loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
+loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split <- loc_split %>% 
+  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
+
+
+new_dir <- "graphs/heatmaps"
+if (!dir.exists(new_dir)) {
+  dir.create(new_dir, recursive = TRUE)
+}
+#swap latitude longitude
+temp <- loc_split$Latitude
+loc_split$Latitude <- loc_split$Longitude
+loc_split$Longitude <- temp
+
+# westport sale price heatmap
+westport <- loc_split[loc_split$Town == "Westport",]
+
+westport_filtered <- loc_split[
+  loc_split$Town == "Westport" &
+    loc_split$Latitude >= 41.09 & loc_split$Latitude <= 41.68 &
+    loc_split$Longitude >= -73.4 & loc_split$Longitude <= -72.9,
+]
+
+
+ggplot(westport_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
+  stat_summary_2d(fun = median, bins = 50) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
+  labs(title="Density of Sale Price in Westport")
+
+nrow(westport)
+unique(loc_split$Town)
+head(loc_split[loc_split$Town=='Westport',])
+
+str(loc_split)
+
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+  filter(!is.na(Town) & Town != "" &
+           !is.na(Assessed.Value) & Assessed.Value != "" & 
+           !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Location) & Location != "")
+
+loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
+loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
+loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split <- loc_split %>% 
+  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
+
+
+new_dir <- "graphs/heatmaps"
+if (!dir.exists(new_dir)) {
+  dir.create(new_dir, recursive = TRUE)
+}
+#swap latitude longitude
+temp <- loc_split$Latitude
+loc_split$Latitude <- loc_split$Longitude
+loc_split$Longitude <- temp
+
+# sprague sale price heatmap
+sprague <- loc_split[loc_split$Town == "Sprague",]
+
+sprague_filtered <- loc_split[
+  loc_split$Town == "Sprague" &
+    loc_split$Latitude >= 41.55 & loc_split$Latitude <= 41.66 &
+    loc_split$Longitude >= -73.23 & loc_split$Longitude <= -72.04,
+]
+
+
+ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
+  stat_summary_2d(fun = median, bins = 50) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
+  labs(title="Density of Sale Price in Sprague")
+
+nrow(sprague)
+unique(loc_split$Town)
+head(loc_split[loc_split$Town=='Sprague',])
+
+str(loc_split)
+```
+
+# Conclusion
+
+# References
