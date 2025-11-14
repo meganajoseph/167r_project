@@ -195,7 +195,27 @@ Assessed Values:
 ![](images/Sprague_AssessedValues_2yr_trend.jpeg)
 
 Sales Ratio:
-
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Average sales ratio by town"
+#| label: SS
+ratio_df <- cleaned_real_estate %>% 
+  group_by(Town, List.Year) %>%
+  summarise(mean_sr_ingroup = mean(Sales.Ratio, na.rm = TRUE))
+  
+ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
+  geom_line(size = 1.2) +
+  geom_point(size = 2) +
+  scale_x_continuous(breaks = unique(ratio_df$List.Year))+
+  geom_hline(yintercept = 1, linetype = "dashed", color = "red") +
+  labs(title = "Average sales ratio by town",
+       x = "Year", 
+       y = "Average Sales Ratio",
+       color = "Town")+
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,vjust = .5))
+```
 # Advanced Analysis
 
 ```{r}
@@ -372,6 +392,90 @@ head(loc_split[loc_split$Town=='Sprague',])
 str(loc_split)
 ```
 
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Scatter plot of regression model"
+#| label: SP
+SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
+ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
+  geom_point(size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  labs(title = "Interaction",
+       x = "Log assessed value",
+       y = "Log sale amount") +
+  facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
+
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Quantile-quantile plot of residuals"
+#| label: QQ
+mod_residuals <- residuals(SS_model_log)
+mod_fitted <- fitted(SS_model_log)
+ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
+  geom_qq() +
+  geom_qq_line() +
+  labs(title = "Quantile-quantile plot of residuals",
+       x = "Theoretical quantile (Normal distribution)",
+       y = "Sample quantile")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "residual histogram"
+#| label: RH
+
+#residual histogram
+ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
+  geom_histogram(bins = 30, fill = "lightyellow", color = "black", alpha = 0.7) +
+  labs(title = "residual histogram",
+       x = "residual",
+       y = "frequency")
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Residual vs. Time"
+#| label: RT
+
+resid_dataframe <- data.frame(time = 1:length(residuals(SS_model_log)),
+                            resid = residuals(SS_model_log),
+                            fittedvalue = fitted(SS_model_log))
+#make the redisual& Time plot
+ggplot(resid_dataframe, aes(x = time,y = resid))+
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  labs( title = "Residual vs. Time",
+        x = "Time",
+        y = "Residual value")
+
+```
+
+```{r}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Residual vs. fitted value"
+#| label: RF
+ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
+  geom_point() +
+  geom_hline(yintercept = 0) +
+  labs( title = "Residual vs. fitted value",
+        x = "Fitted value",
+        y = "Residual value")
+
+```
 # Conclusion
 
 # References

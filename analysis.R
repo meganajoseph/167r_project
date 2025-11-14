@@ -96,7 +96,7 @@ ggplot(data=cleaned_real_estate, aes(log(Sale.Amount))) +
 ratio_df <- cleaned_real_estate %>% 
   group_by(Town, List.Year) %>%
   summarise(mean_sr_ingroup = mean(Sales.Ratio, na.rm = TRUE))
-  
+
 ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
   geom_line(size = 1.2) +
   geom_point(size = 2) +
@@ -106,7 +106,7 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
        x = "Year", 
        y = "Average Sales Ratio",
        color = "Town")+
-  theme_minimal()
+  theme(axis.text.x = element_text(angle = 45, hjust = 1,vjust = .5))
 
 # generate biannual boxplots (with some redundant functions for now, will consolidate later)
 data <- real_estate
@@ -855,9 +855,9 @@ mod_fitted <- fitted(SS_model_log)
 ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
   geom_qq() +
   geom_qq_line() +
-  xlab("Theoretical quantile (Normal distribution)") +
-  ylab("Sample quantile") + 
-  ggtitle("Quantile-quantile plot of residuals")
+  labs(title = "Quantile-quantile plot of residuals",
+       x = "Theoretical quantile (Normal distribution)",
+       y = "Sample quantile")
 
 #residual histogram
 ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
@@ -871,18 +871,19 @@ resid_dataframe <- data.frame(time = 1:length(residuals(SS_model_log)),
                             resid = residuals(SS_model_log),
                             fittedvalue = fitted(SS_model_log))
 #make the redisual& Time plot
-ggplot(resid_dataframe1, aes(x = time,y = resid))+
+ggplot(resid_dataframe, aes(x = time,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
-  ylab("Residual value") +
-  xlab("Time") + 
-  ggtitle("Residual vs. Time")
+  labs( title = "Residual vs. Time",
+        x = "Time",
+        y = "Residual value")
 
 #make the redisual& fitted plot
 
 ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
-  ylab("Residual value") +
-  xlab("Fitted value") + 
-  ggtitle("Residual vs. fitted value")
+  labs( title = "Residual vs. fitted value",
+        x = "Fitted value",
+        y = "Residual value")
+
