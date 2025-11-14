@@ -9,10 +9,11 @@ real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
 # clean data
 # make sale.ratio numeric
-real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
+real_estate$Sales.Ratio <- as.numeric(real_estate$Sales.Ratio)
 
 # take columns we want
-real_estate_simp <- real_estate %>% select("List.Year", "Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Property.Type", "Residential.Type") %>%
+real_estate_simp <- real_estate %>% 
+  select(List.Year, Town, Assessed.Value, Sale.Amount, Sales.Ratio, Property.Type, Residential.Type) %>%
   filter(!is.na(List.Year) & List.Year != "" & 
            !is.na(Town) & Town != "" & 
            !is.na(Assessed.Value) & Assessed.Value != "" &
