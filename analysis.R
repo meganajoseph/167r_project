@@ -159,6 +159,7 @@ par(mfrow = c(rows, 2), mar = c(4, 4, 3, 1))  # adjust margins
 
 # plot each interval
 for (i in seq_along(boxplot_data)) {
+  par(mar = c(5, 6, 4, 2))
   boxplot(boxplot_data[[i]],
           main = valid_labels[i],
           ylab = "Sale Amount",
@@ -446,7 +447,7 @@ for (t_index in seq_along(towns)) {
           names = valid_labels,
           col = col,
           ylim = y_limits,
-          las = 2,          # vertical x-axis labels
+          las = 1.5,          # vertical x-axis labels
           ylab = "Assessed Value",
           main = paste("Assessed Value Trends -", town))
   
@@ -519,17 +520,19 @@ for (t_index in seq_along(towns)) {
 
 
 # geographical heatmap
-locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location") %>%
+locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Location") %>%
   filter(!is.na(Town) & Town != "" &
            !is.na(Assessed.Value) & Assessed.Value != "" & 
            !is.na(Sale.Amount) & Sale.Amount != "" & 
+           !is.na(Sales.Ratio) & Sales.Ratio != "" &
            !is.na(Location) & Location != "")
 
 loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
 loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
 loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
+loc_split$Sales.Ratio <- as.numeric(loc_split$Sales.Ratio)
 loc_split <- loc_split %>% 
-  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude") %>%
+  select("Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Latitude", "Longitude") %>%
   filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
 
 
@@ -540,49 +543,28 @@ if (!dir.exists(new_dir)) {
 
 pdf_path <- file.path(new_dir, "sale_price_ct.pdf")
 pdf(pdf_path) 
-ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Sale.Amount)) +
-  stat_summary_2d(fun = median, bins = 40) +
-  scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
+ggplot(loc_split, aes(x=Latitude, y=Longitude, z=log(Sale.Amount))) +
+  stat_summary_2d(fun = median, bins = 30) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Log Sale Price") +
   labs(title="Density of Sale Price in Connecticut")
 dev.off()
 
-ggplot(loc_split, aes(x=Latitude, y=Longitude, z=Assessed.Value)) +
-  stat_summary_2d(fun = median, bins = 40) +
-  scale_fill_gradientn(colors=terrain.colors(10), name="Assessed Value") +
+pdf_path <- file.path(new_dir, "assessed_value_ct.pdf")
+pdf(pdf_path) 
+ggplot(loc_split, aes(x=Latitude, y=Longitude, z=log(Assessed.Value))) +
+  stat_summary_2d(fun = median, bins = 30) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Log Assessed Value") +
   labs(title="Density of Assessed Value in Connecticut")
+dev.off()
 
 # john heatmap additions
-locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Location", "Sales.Ratio") %>%
-  filter(!is.na(Town) & Town != "" &
-           !is.na(Assessed.Value) & Assessed.Value != "" &
-           !is.na(Sale.Amount) & Sale.Amount != "" &
-           !is.na(Sales.Ratio) & Sales.Ratio != "" &
-           !is.na(Location) & Location != "")
-
-
-
-loc_split <- within(locations, Location <- data.frame(do.call('rbind', strsplit(as.character(Location), " "))))
-loc_split$Latitude <- as.numeric(gsub("\\(", "", loc_split$Location$X2))
-loc_split$Longitude <- as.numeric(gsub("\\)", "", loc_split$Location$X3))
-loc_split$Sales.Ratio <- as.numeric(loc_split$Sales.Ratio)
-loc_split <- loc_split %>%
-  select("Town", "Assessed.Value", "Sale.Amount", "Latitude", "Longitude", "Sales.Ratio") %>%
-  filter(Latitude < -69 & Latitude > -74 & Longitude < 42.5 & Longitude > 40)
-
-ggplot(loc_split, aes(x=Longitude, y=Latitude, z=Sale.Amount)) +
-  stat_summary_2d(fun = median, bins = 40) +
-  scale_fill_gradientn(colors=terrain.colors(10), name="Sale Price") +
-  labs(title="Density of Sale Price in Connecticut")
-
-ggplot(loc_split, aes(x=Longitude, y=Latitude, z=Assessed.Value)) +
-  stat_summary_2d(fun = median, bins = 40) +
-  scale_fill_gradientn(colors=terrain.colors(10), name="Assessed Value") +
-  labs(title="Density of Assessed Value in Connecticut")
-
+pdf_path <- file.path(new_dir, "sales_ratio_ct.pdf")
+pdf(pdf_path) 
 ggplot(loc_split, aes(x=Longitude, y=Latitude, z=log(Sales.Ratio))) +
-  stat_summary_2d(fun = median, bins = 40) +
-  scale_fill_gradientn(colors=terrain.colors(10), name="Sales Ratio") +
+  stat_summary_2d(fun = median, bins = 30) +
+  scale_fill_gradientn(colors=terrain.colors(10), name="Log Sales Ratio") +
   labs(title="Density of Sales Ratio in Connecticut")
+dev.off()
 
 #swap latitude longitude
 temp <- loc_split$Latitude
@@ -601,10 +583,13 @@ stamford_filtered <- loc_split[
 ]
 
 
+pdf_path <- file.path(new_dir, "sale_price_stamford.pdf")
+pdf(pdf_path) 
 ggplot(stamford_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
   labs(title="Density of Sale Price in Stamford")
+dev.off()
 
 nrow(stamford)
 unique(loc_split$Town)
@@ -621,11 +606,13 @@ cheshire_filtered <- loc_split[
     loc_split$Longitude >= -73 & loc_split$Longitude <= -72.75,
 ]
 
-
+pdf_path <- file.path(new_dir, "sale_price_cheshire.pdf")
+pdf(pdf_path) 
 ggplot(cheshire_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
   labs(title="Density of Sale Price in Cheshire")
+dev.off()
 
 # westport sale price heatmap
 westport <- loc_split[loc_split$Town == "Westport",]
@@ -636,11 +623,13 @@ westport_filtered <- loc_split[
     loc_split$Longitude >= -73.4 & loc_split$Longitude <= -72.9,
 ]
 
-
+pdf_path <- file.path(new_dir, "sale_price_westport.pdf")
+pdf(pdf_path) 
 ggplot(westport_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
   labs(title="Density of Sale Price in Westport")
+dev.off()
 
 nrow(westport)
 unique(loc_split$Town)
@@ -657,11 +646,13 @@ sprague_filtered <- loc_split[
     loc_split$Longitude >= -73.23 & loc_split$Longitude <= -72.04,
 ]
 
-
+pdf_path <- file.path(new_dir, "sale_price_sprague.pdf")
+pdf(pdf_path) 
 ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sale Price") +
   labs(title="Density of Sale Price in Sprague")
+dev.off()
 
 nrow(sprague)
 unique(loc_split$Town)
@@ -673,165 +664,79 @@ str(loc_split)
 # assessed heatmaps
 
 # stamford assessed value heatmap
-stamford <- loc_split[loc_split$Town == "Stamford",]
-
-stamford_filtered <- loc_split[
-  loc_split$Town == "Stamford" &
-    loc_split$Latitude >= 41 & loc_split$Latitude <= 42 &
-    loc_split$Longitude >= -73.6 & loc_split$Longitude <= -73.4,
-]
-
-
+pdf_path <- file.path(new_dir, "assessed_value_stamford.pdf")
+pdf(pdf_path) 
 ggplot(stamford_filtered, aes(x=Longitude, y=Latitude, z=log(Assessed.Value))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Assessed Value") +
   labs(title="Density of Assessed Value in Stamford")
-
-nrow(stamford)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Stamford',])
-
-str(loc_split)
+dev.off()
 
 # cheshire assessed value heatmap
-cheshire <- loc_split[loc_split$Town == "Cheshire",]
-
-cheshire_filtered <- loc_split[
-  loc_split$Town == "Cheshire" &
-    loc_split$Latitude >= 41.4 & loc_split$Latitude <= 41.6 &
-    loc_split$Longitude >= -73 & loc_split$Longitude <= -72.75,
-]
-
-
+pdf_path <- file.path(new_dir, "assessed_value_cheshire.pdf")
+pdf(pdf_path) 
 ggplot(cheshire_filtered, aes(x=Longitude, y=Latitude, z=log(Assessed.Value))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Assessed Value") +
   labs(title="Density of Assessed Value in Cheshire")
+dev.off()
 
 # westport assessed value heatmap
-westport <- loc_split[loc_split$Town == "Westport",]
-
-westport_filtered <- loc_split[
-  loc_split$Town == "Westport" &
-    loc_split$Latitude >= 41.09 & loc_split$Latitude <= 41.68 &
-    loc_split$Longitude >= -73.4 & loc_split$Longitude <= -72.9,
-]
-
-
+pdf_path <- file.path(new_dir, "assessed_value_westport.pdf")
+pdf(pdf_path) 
 ggplot(westport_filtered, aes(x=Longitude, y=Latitude, z=log(Assessed.Value))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Assessed Value") +
   labs(title="Density of Assessed Value in Westport")
-
-nrow(westport)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Westport',])
-
-str(loc_split)
+dev.off()
 
 # sprague assessed value heatmap
-sprague <- loc_split[loc_split$Town == "Sprague",]
-
-sprague_filtered <- loc_split[
-  loc_split$Town == "Sprague" &
-    loc_split$Latitude >= 41.55 & loc_split$Latitude <= 41.66 &
-    loc_split$Longitude >= -73.23 & loc_split$Longitude <= -72.04,
-]
-
-
+pdf_path <- file.path(new_dir, "assessed_value_sprague.pdf")
+pdf(pdf_path) 
 ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Assessed.Value))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Assessed Value") +
   labs(title="Density of Assessed Value in Sprague")
-
-nrow(sprague)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Sprague',])
-
-str(loc_split)
+dev.off()
 
 
 #ratio maps
 
 # stamford ratio heatmap
-stamford <- loc_split[loc_split$Town == "Stamford",]
-
-stamford_filtered <- loc_split[
-  loc_split$Town == "Stamford" &
-    loc_split$Latitude >= 41 & loc_split$Latitude <= 42 &
-    loc_split$Longitude >= -73.6 & loc_split$Longitude <= -73.4,
-]
-
-
+pdf_path <- file.path(new_dir, "sales_ratio_stamford.pdf")
+pdf(pdf_path) 
 ggplot(stamford_filtered, aes(x=Longitude, y=Latitude, z=log(Sales.Ratio))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sales Ratio") +
   labs(title="Density of Sales Ratio in Stamford")
-
-nrow(stamford)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Stamford',])
-
-str(loc_split)
+dev.off()
 
 # cheshire ratio heatmap
-cheshire <- loc_split[loc_split$Town == "Cheshire",]
-
-cheshire_filtered <- loc_split[
-  loc_split$Town == "Cheshire" &
-    loc_split$Latitude >= 41.4 & loc_split$Latitude <= 41.6 &
-    loc_split$Longitude >= -73 & loc_split$Longitude <= -72.75,
-]
-
-
+pdf_path <- file.path(new_dir, "sales_ratio_cheshire.pdf")
+pdf(pdf_path) 
 ggplot(cheshire_filtered, aes(x=Longitude, y=Latitude, z=log(Sales.Ratio))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sales Ratio") +
   labs(title="Density of Sales Ratio in Cheshire")
+dev.off()
 
 # westport ratio heatmap
-westport <- loc_split[loc_split$Town == "Westport",]
-
-westport_filtered <- loc_split[
-  loc_split$Town == "Westport" &
-    loc_split$Latitude >= 41.09 & loc_split$Latitude <= 41.68 &
-    loc_split$Longitude >= -73.4 & loc_split$Longitude <= -72.9,
-]
-
-
+pdf_path <- file.path(new_dir, "sales_ratio_westport.pdf")
+pdf(pdf_path) 
 ggplot(westport_filtered, aes(x=Longitude, y=Latitude, z=log(Sales.Ratio))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sales Ratio") +
   labs(title="Density of Sales Ratio in Westport")
-
-nrow(westport)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Westport',])
-
-str(loc_split)
+dev.off()
 
 # sprague ratio heatmap
-sprague <- loc_split[loc_split$Town == "Sprague",]
-
-sprague_filtered <- loc_split[
-  loc_split$Town == "Sprague" &
-    loc_split$Latitude >= 41.55 & loc_split$Latitude <= 41.66 &
-    loc_split$Longitude >= -73.23 & loc_split$Longitude <= -72.04,
-]
-
-
+pdf_path <- file.path(new_dir, "sales_ratio_sprague.pdf")
+pdf(pdf_path) 
 ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sales.Ratio))) +
   stat_summary_2d(fun = median, bins = 50) +
   scale_fill_gradientn(colors=terrain.colors(10), name="log Sales Ratio") +
   labs(title="Density of Sales Ratio in Sprague")
-
-nrow(sprague)
-unique(loc_split$Town)
-head(loc_split[loc_split$Town=='Sprague',])
-
-str(loc_split)
-
-
+dev.off()
 
 # advanced analysis
 # regression model
