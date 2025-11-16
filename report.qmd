@@ -192,11 +192,12 @@ Sprague is an interesting case, because its a relatively poor area with fewer re
 
 Sales Ratio:
 
-```{r sr-plot}
+```{r}
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Average sales ratio by town:Average Sales Ratio (ASR) = Average Assessed Value (AAV) / Average Sales Amount (ASA). ASR > 1 means the Average Assessed Value  is higher than the Average Sales Amount ; ASR = 1 means the AAV is equal to the ASA; ASR < 1 means the AAV is lower than the ASA. "
+#|label: fig-ratio-plot
 ratio_df <- cleaned_real_estate %>% 
   group_by(Town, List.Year) %>%
   summarise(mean_sr_ingroup = mean(Sales.Ratio, na.rm = TRUE))
@@ -213,7 +214,7 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-@fig-sr-plot Westport is a wealthy town with high property values, and Cheshire is a upper-middle-class town. Stamford is a urban city where near NYC and its economy is closely related to NYC. Sprague is a small town with lower-middle-income. In general, The well-off town (Westport/Cheshire/Stamford) experience smaller sales ratios. during the 2008 financial crisis, the less economically developed town (Hartford) and the NYC-dependent-economic-structure town (Stamford) experience greater market volatility. Considering the time-lag factor, During the 2007–2008 subprime mortgage crisis, housing prices plummeted, causing the ASR in many towns to rise rapidly, even faster than the speed of assessment adjustments. After 2009, the ASR in most towns declined because the real estate market began to recover, and housing prices increased faster than the assessment values. During the global pandemic in 2020, the ASR of all four towns showed a significant downward trend, reflecting a surge in housing prices which causing by the extremely low mortgage interest rates and the increase in housing demand driven by the work-from-home trend.
+@fig-ratio-plot Westport is a wealthy town with high property values, and Cheshire is a upper-middle-class town. Stamford is a urban city where near NYC and its economy is closely related to NYC. Sprague is a small town with lower-middle-income. In general, The well-off town (Westport/Cheshire/Stamford) experience smaller sales ratios. during the 2008 financial crisis, the less economically developed town (Hartford) and the NYC-dependent-economic-structure town (Stamford) experience greater market volatility. Considering the time-lag factor, During the 2007–2008 subprime mortgage crisis, housing prices plummeted, causing the ASR in many towns to rise rapidly, even faster than the speed of assessment adjustments. After 2009, the ASR in most towns declined because the real estate market began to recover, and housing prices increased faster than the assessment values. During the global pandemic in 2020, the ASR of all four towns showed a significant downward trend, reflecting a surge in housing prices which causing by the extremely low mortgage interest rates and the increase in housing demand driven by the work-from-home trend.
 
 # Advanced Analysis
 
@@ -329,27 +330,23 @@ sg <- ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount)))
 
 @fig-heatmap-cities shows the densities of sale price in the four cities we picked. Stamford and Westport seem to have the most data points, with Sprague being the most sparse. Sprague, Westport, and Stamford are more uniform whereas Cheshire has more variability in prices.
 
-```{r Scatter-plot}
-#| echo: false
-#| warning: false
-#| message: false
-#| fig-cap: "Scatter plot of regression model"
+\newpage
+To understand whether the relationship between assessed value and sale amount differs across towns, we applied a regression model and the t-test to find out whether the assessed value is correlated with the sale amount and whether this relationship differs across towns.
 
-SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
-ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
-  geom_point(size = 0.8) +
-  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
-  labs(title = "Interaction",
-       x = "Log assessed value",
-       y = "Log sale amount") +
-  facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
-```
+Because the population sizes and income levels differ across the four selected towns, we applied a log transformation to both Sale Amount and Assessed Value to make the data fit better and look clearer in the plots. This is the our model: $$
+log(Sale.Amount)=β0+β1*log(Assessed.Value)+β2*Town+β3*[log(Assessed.Value)×Town]+ε
+$$ Here: $β0$, the intercept, is the expected log sale price in the reference town (Cheshire) when the log(assessed value) is 0, holding all other variables constant.$β1$, the coefficient of log(Assessed.Value), represents that each additional 1% increase in assessed value is associated with an average percent increase in sale price in Cheshire, holding all other variables constant.$β2$, the set of coefficients,represents the Intercept difference between each individual town(Sprague, Stamford, Westport) and Cheshire.$β3$, the set of coefficients, represents the difference in effect of assessed value on sale price across individual towns (Sprague, Stamford, Westport) compared to Cheshire.$ε$ is the error term.
 
-```{r assumption-plots}
+To ensure valid inference(@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread increases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
+
+```{r}
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Assumptions"
+#| label: fig-assumption-plots
+SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
+
 mod_residuals <- residuals(SS_model_log)
 mod_fitted <- fitted(SS_model_log)
 ggp3 <- ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
@@ -390,6 +387,25 @@ ggp6 <- ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
 (ggp3 + ggp4)/(ggp5 +ggp6)
 
 ```
+
+```{r Scatter-plot}
+#| echo: false
+#| warning: false
+#| message: false
+#| fig-cap: "Scatter plot of regression model"
+#| label: fig-scatter-plot
+
+SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
+ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
+  geom_point(size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  labs(title = "Interaction",
+       x = "Log assessed value",
+       y = "Log sale amount") +
+  facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
+```
+
+@fig-scatter-plot shows that the assessed value is positively correlated with the sale amount in all four towns. In Cheshire, for each additional percentage increase in assessed value, the expected sale amount will increase by 0.745%. The interaction term shows that compared with Cheshire, the slope of the assessed value and the expected sale amount in Sprague(β =0.047，p = 0.384 \> 0.05) and Stamford( β = -0.004, p = 0.742 \> 0.05)is similar. The relationship is stronger in Westport (β = 0.153, p \< 0.001), showing that the expected sale amount in Westport tends to change more than in the other towns when assessed value changes. In general, the model fits the data well (R\^2 = 0.68).Because the equal variance assumption is violated, its explanatory power is limited .The access value and the town can only explain part of the difference in sale amount, and other factors (policy, house area, etc.) may have an influence.
 
 # Conclusion
 
