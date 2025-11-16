@@ -192,12 +192,11 @@ Sprague is an interesting case, because its a relatively poor area with fewer re
 
 Sales Ratio:
 
-```{r}
+```{r sr-plot}
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: "Average sales ratio by town"
-#| label: SS
+#| fig-cap: "Average sales ratio by town:Average Sales Ratio (ASR) = Average Assessed Value (AAV) / Average Sales Amount (ASA). ASR > 1 means the Average Assessed Value  is higher than the Average Sales Amount ; ASR = 1 means the AAV is equal to the ASA; ASR < 1 means the AAV is lower than the ASA. "
 ratio_df <- cleaned_real_estate %>% 
   group_by(Town, List.Year) %>%
   summarise(mean_sr_ingroup = mean(Sales.Ratio, na.rm = TRUE))
@@ -213,6 +212,8 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
        color = "Town")+
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
+
+@fig-sr-plot Westport is a wealthy town with high property values, and Cheshire is a upper-middle-class town. Stamford is a urban city where near NYC and its economy is closely related to NYC. Sprague is a small town with lower-middle-income. In general, The well-off town (Westport/Cheshire/Stamford) experience smaller sales ratios. during the 2008 financial crisis, the less economically developed town (Hartford) and the NYC-dependent-economic-structure town (Stamford) experience greater market volatility. Considering the time-lag factor, During the 2007–2008 subprime mortgage crisis, housing prices plummeted, causing the ASR in many towns to rise rapidly, even faster than the speed of assessment adjustments. After 2009, the ASR in most towns declined because the real estate market began to recover, and housing prices increased faster than the assessment values. During the global pandemic in 2020, the ASR of all four towns showed a significant downward trend, reflecting a surge in housing prices which causing by the extremely low mortgage interest rates and the increase in housing demand driven by the work-from-home trend.
 
 # Advanced Analysis
 
@@ -328,12 +329,12 @@ sg <- ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount)))
 
 @fig-heatmap-cities shows the densities of sale price in the four cities we picked. Stamford and Westport seem to have the most data points, with Sprague being the most sparse. Sprague, Westport, and Stamford are more uniform whereas Cheshire has more variability in prices.
 
-```{r}
+```{r Scatter-plot}
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Scatter plot of regression model"
-#| label: SP
+
 SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
 ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
   geom_point(size = 0.8) +
@@ -344,12 +345,11 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
   facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
 ```
 
-```{r}
+```{r assumption-plots}
 #| echo: false
 #| warning: false
 #| message: false
 #| fig-cap: "Assumptions"
-#| label: 
 mod_residuals <- residuals(SS_model_log)
 mod_fitted <- fitted(SS_model_log)
 ggp3 <- ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
