@@ -13,6 +13,10 @@ number-sections: true
 
 # Introduction
 
+Real estate trends change over the years. The most notable changes have been during the 2008 economic crisis and COVID-19. We decided to investigate real estate in Connecticut, USA to see how it's changed over time and how it differs across cities.
+
+We first clean the data and calculate descriptive statistics. Then, we make graphs of the categorical variables and continuous variables based on the cities we picked. In our advanced analysis, we make heat maps showing the densities of sale price and a multiple linear regression model.
+
 # Data
 
 ```{r}
@@ -220,7 +224,9 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
 
 # Advanced Analysis
 
-```{r}
+We decided to make a heat map of sale price, assessed value, and sale ratio for the entirety of Connecticut and the cities we selected.
+
+```{r fig-heatmap-ct}
 #| echo: false
 #| warning: false
 #| message: false
@@ -248,7 +254,9 @@ ggplot(loc_split, aes(x=Latitude, y=Longitude, z=log(Sale.Amount))) +
   labs(title="Density of Sale Price in Connecticut")
 ```
 
-```{r fig.width=7, fig.height=5}
+@fig-heatmap-ct shows the densities of sale price for Connecticut. For the majority of Connecticut, the sale price is uniform. However, the closer you get to New York, the higher the sale price is.
+
+```{r fig-heatmap-cities, fig.width=7, fig.height=5}
 #| echo: false
 #| warning: false
 #| message: false
@@ -325,6 +333,8 @@ sg <- ggplot(sprague_filtered, aes(x=Longitude, y=Latitude, z=log(Sale.Amount)))
 
 (sf + ch) / (wp + sg)
 ```
+
+@fig-heatmap-cities shows the densities of sale price in the four cities we picked. Stamford and Westport seem to have the most data points, with Sprague being the most sparse. Sprague, Westport, and Stamford are more uniform whereas Cheshire has more variability in prices.
 
 ```{r}
 #| echo: false
