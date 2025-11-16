@@ -168,31 +168,19 @@ We took the log of the sale price because it is extremely right skewed otherwise
 
 ### Box Plots By Town
 
-We constructed a series of boxplots and scatterplots for each of our continuous variables (sale price, assessed value, and sales ratio), and then repeating this step for each of the four towns selected (Stamford, Westport, Cheshire, and Sprague). We decided that aligning the boxplots vertically and then sorting them in time order would effectively demonstrate trends over time in a more effective manner.
+We constructed a series of boxplots and scatterplots for each of our continuous variables (sale price, assessed value, and sales ratio), and then repeating this step for each of the four towns selected (Stamford, Westport, Cheshire, and Sprague). We decided that aligning biannual boxplots vertically and then sorting them in time order would demonstrate trends over time in a more effective manner.
 
 Sales Amounts:
 
-![](images/Stamford_SaleAmounts_2yr_trend.jpg)
-
-We are still combing through the upper end of the Sale Amount column for errors. In a dataset this large, there are bound to be mistakes which lead to unreasonable figures which deserve to be deleted.
-
-![](images/Westport_SaleAmounts_2yr_trend.jpg)
-
-Here we see some evidence of national and regional property market trends in a very right skewed town. The large number of outliers, some of which are priced rather high, speaks to a desirable coastal community within easy commuting distance of New York City. Notice the rapid outlier rebound after the 2008 financial crisis.
-
 ![](images/Cheshire_SaleAmounts_2yr_trend-01.jpg)
 
-Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the man quartiles, not really rebounding until the Covid-19 pandemic. It is farther away from major metropolitan areas and the coast, with a smaller population. It appeals to buyers with more modest means.
+Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the main quartiles, not really rebounding until the Covid-19 pandemic. It is farther away from major metropolitan areas and the coast, with a smaller population. It appeals to buyers with more modest means.
 
 ![](images/Sprague_SaleAmounts_2yr_trend-01.jpg)
 
 Sprague, the smallest of the towns we chose, displayed more year to year variability and a great deal more market driven variability than larger towns. Part of that is likely due to lower sales volume, and perhaps since it is less prosperous it was a relative bargain and accessible to more buyers.
 
 Assessed Values:
-
-![](images/Stamford_AssessedValues_2yr_trend.jpeg)
-
-![](images/Westport_AssessedValues_2yr_trend.jpeg)
 
 ![](images/Cheshire_AssessedValues_2yr_trend.jpeg)
 
