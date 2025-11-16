@@ -1,7 +1,7 @@
 # import libraries
 library(tidyverse)
 library(ggplot2)
-
+library(patchwork)
 # import data
 real_estate <- read.csv("Real_Estate_Sales_2001-2023_GL.csv")
 
@@ -746,18 +746,27 @@ summary(SS_model)
 SS_model_log <- lm(log(Sale.Amount) ~ log(Assessed.Value) * Town, data = (cleaned_real_estate %>% filter( Assessed.Value > 0 & Sale.Amount > 0)))
 summary(SS_model_log)
 
-ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
+ggp1 <-ggplot(cleaned_real_estate, aes(x = Assessed.Value, y = Sale.Amount, color = Town)) +
+  geom_point(size = 0.8) +
+  geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
+  labs(title = "Interaction(without log transformation)",
+       x = "assessed value",
+       y = "sale amount") +
+  facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
+
+ggp2 <- ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), color = Town)) +
   geom_point(size = 0.8) +
   geom_smooth(method = "lm", se = FALSE, formula = y ~ x) +
   labs(title = "Interaction",
        x = "Log assessed value",
        y = "Log sale amount") +
   facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
+ggp2
 
 #assumption
 mod_residuals <- residuals(SS_model_log)
 mod_fitted <- fitted(SS_model_log)
-ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
+ggp3 <- ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
   geom_qq() +
   geom_qq_line() +
   labs(title = "Quantile-quantile plot of residuals",
@@ -765,7 +774,7 @@ ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
        y = "Sample quantile")
 
 #residual histogram
-ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
+ggp4<- ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
   geom_histogram(bins = 30, fill = "lightyellow", color = "black", alpha = 0.7) +
   labs(title = "residual histogram",
        x = "residual",
@@ -776,7 +785,7 @@ resid_dataframe <- data.frame(time = 1:length(residuals(SS_model_log)),
                             resid = residuals(SS_model_log),
                             fittedvalue = fitted(SS_model_log))
 #make the redisual& Time plot
-ggplot(resid_dataframe, aes(x = time,y = resid))+
+ggp5 <- ggplot(resid_dataframe, aes(x = time,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
   labs( title = "Residual vs. Time",
@@ -785,10 +794,11 @@ ggplot(resid_dataframe, aes(x = time,y = resid))+
 
 #make the redisual& fitted plot
 
-ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
+ggp6 <- ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
   labs( title = "Residual vs. fitted value",
         x = "Fitted value",
         y = "Residual value")
 
+(ggp3 + ggp4)/(ggp5 +ggp6)

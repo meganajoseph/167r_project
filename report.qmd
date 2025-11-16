@@ -344,65 +344,46 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
 #| echo: false
 #| warning: false
 #| message: false
-#| fig-cap: "Quantile-quantile plot of residuals"
-#| label: QQ
+#| fig-cap: "Assumptions"
+#| label: 
 mod_residuals <- residuals(SS_model_log)
 mod_fitted <- fitted(SS_model_log)
-ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
+ggp3 <- ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
   geom_qq() +
   geom_qq_line() +
   labs(title = "Quantile-quantile plot of residuals",
        x = "Theoretical quantile (Normal distribution)",
        y = "Sample quantile")
-```
-
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| fig-cap: "residual histogram"
-#| label: RH
 
 #residual histogram
-ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
+ggp4<- ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
   geom_histogram(bins = 30, fill = "lightyellow", color = "black", alpha = 0.7) +
   labs(title = "residual histogram",
        x = "residual",
        y = "frequency")
-```
 
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| fig-cap: "Residual vs. Time"
-#| label: RT
 
 resid_dataframe <- data.frame(time = 1:length(residuals(SS_model_log)),
                             resid = residuals(SS_model_log),
                             fittedvalue = fitted(SS_model_log))
 #make the redisual& Time plot
-ggplot(resid_dataframe, aes(x = time,y = resid))+
+ggp5 <- ggplot(resid_dataframe, aes(x = time,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
   labs( title = "Residual vs. Time",
         x = "Time",
         y = "Residual value")
 
-```
+#make the redisual& fitted plot
 
-```{r}
-#| echo: false
-#| warning: false
-#| message: false
-#| fig-cap: "Residual vs. fitted value"
-#| label: RF
-ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
+ggp6 <- ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
   labs( title = "Residual vs. fitted value",
         x = "Fitted value",
         y = "Residual value")
+
+(ggp3 + ggp4)/(ggp5 +ggp6)
 
 ```
 
