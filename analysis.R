@@ -338,7 +338,7 @@ data_clean$List.Year <- as.numeric(data_clean$List.Year)
 data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
 
 # towns and colors
-towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
 colors <- c("lightblue", "lightgreen", "pink", "gold")
 
 # define 2-year intervals
@@ -393,6 +393,91 @@ for (t_index in seq_along(towns)) {
   cat("PDF created for", town, ":", pdf_filename, "\n")
 }
 
+########## test improved sales
+
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sale.Amount <- as.numeric(data_clean$Sale.Amount)
+
+# towns and colors
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y + 1, end_year)))
+
+# ---------------------------------------------------------------------
+# CUSTOM Y-AXIS FORMATTER
+axis_dollar <- function(side, ...) {
+  ticks <- axTicks(side)
+  formatted <- ifelse(
+    abs(ticks) >= 1e6, paste0("$", round(ticks / 1e6, 2), "M"),
+    ifelse(abs(ticks) >= 1e3, paste0("$", round(ticks / 1e3, 1), "k"),
+           paste0("$", ticks))
+  )
+  axis(side, at = ticks, labels = formatted, ...)
+}
+# ---------------------------------------------------------------------
+
+for (t_index in seq_along(towns)) {
+  
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y + 1, end_year)
+    
+    data_subset <- data_clean[
+      data_clean$Town == town &
+        data_clean$List.Year %in% years_interval, ]
+    
+    sales <- na.omit(data_subset$Sale.Amount)
+    
+    if (length(sales) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- sales
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No Sale.Amount data found for", town))
+    next
+  }
+  
+  y_limits <- range(unlist(boxplot_data))
+  
+  # ---- JPEG DEVICE ----
+  jpeg_filename <- paste0(town, "_SaleAmounts_2yr_trend.jpeg")
+  jpeg(jpeg_filename, width = 1600, height = 800, quality = 100)
+  
+  par(mar = c(8, 7, 4, 2))
+  
+  boxplot(
+    boxplot_data,
+    names = valid_labels,
+    col = col,
+    ylim = y_limits,
+    las = 2,
+    ylab = "Sale Amount",
+    main = paste("Sale Amount Trends -", town),
+    axes = FALSE
+  )
+  
+  axis(1, at = seq_along(valid_labels), labels = valid_labels, las = 2)
+  axis_dollar(2)
+  box()
+  
+  dev.off()
+  cat("JPEG created for", town, ":", jpeg_filename, "\n")
+}
+
+
 ######## side by side assessed values
 
 # ensure numeric columns
@@ -400,7 +485,7 @@ data_clean$List.Year <- as.numeric(data_clean$List.Year)
 data_clean$Assessed.Value <- as.numeric(data_clean$Assessed.Value)
 
 # towns and colors
-towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
 colors <- c("lightblue", "lightgreen", "pink", "gold")
 
 # define 2-year intervals
@@ -455,6 +540,98 @@ for (t_index in seq_along(towns)) {
   cat("PDF created for", town, ":", pdf_filename, "\n")
 }
 
+################ test improved assessed
+
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Assessed.Value <- as.numeric(data_clean$Assessed.Value)
+
+# towns and colors
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2005
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y + 1, end_year)))
+
+# ---------------------------------------------------------------------
+# CUSTOM Y-AXIS FORMATTER
+axis_dollar <- function(side, ...) {
+  ticks <- axTicks(side)
+  formatted <- ifelse(
+    abs(ticks) >= 1e6, paste0("$", round(ticks / 1e6, 2), "M"),
+    ifelse(abs(ticks) >= 1e3, paste0("$", round(ticks / 1e3, 1), "k"),
+           paste0("$", ticks))
+  )
+  axis(side, at = ticks, labels = formatted, ...)
+}
+
+# ---------------------------------------------------------------------
+
+for (t_index in seq_along(towns)) {
+  
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  # prepare data: one list per 2-year interval
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y + 1, end_year)
+    
+    data_subset <- data_clean[data_clean$Town == town & 
+                                data_clean$List.Year %in% years_interval, ]
+    values <- na.omit(data_subset$Assessed.Value)
+    
+    # FIXED: use 'values', not 'sales'
+    if (length(values) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- values
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No Assessed.Value data found for", town))
+    next
+  }
+  
+  # y-axis range
+  y_limits <- range(unlist(boxplot_data))
+  
+  # -----------------------------
+  # JPEG OUTPUT (replacing PDF)
+  # -----------------------------
+  jpeg_filename <- paste0(town, "_AssessedValues_2yr_trend.jpg")
+  jpeg(jpeg_filename, width = 2000, height = 1000, res = 200, quality = 100)
+  
+  # give room for labels
+  par(mar = c(8, 7, 4, 2))
+  
+  # draw boxplot
+  boxplot(
+    boxplot_data,
+    names = valid_labels,
+    col = col,
+    ylim = y_limits,
+    las = 2,
+    ylab = "Assessed Value",
+    main = paste("Assessed Amount Trends -", town),
+    axes = FALSE
+  )
+  
+  # custom axes
+  axis(1, at = seq_along(valid_labels), labels = valid_labels, las = 2)
+  axis_dollar(2)
+  box()
+  
+  dev.off()
+  cat("JPEG created for", town, ":", jpeg_filename, "\n")
+}
+
+
 ################ sales ratio
 
 # ensure numeric columns
@@ -462,7 +639,7 @@ data_clean$List.Year <- as.numeric(data_clean$List.Year)
 data_clean$Sales.Ratio <- as.numeric(data_clean$Sales.Ratio)
 
 # towns and colors
-towns <- c("Hartford", "Westport", "Cheshire", "Sprague")
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
 colors <- c("lightblue", "lightgreen", "pink", "gold")
 
 # define 2-year intervals
@@ -517,7 +694,83 @@ for (t_index in seq_along(towns)) {
   cat("PDF created for", town, ":", pdf_filename, "\n")
 }
 
+############## improvement test
 
+# ensure numeric columns
+data_clean$List.Year <- as.numeric(data_clean$List.Year)
+data_clean$Sales.Ratio <- as.numeric(data_clean$Sales.Ratio)
+
+# towns and colors
+towns <- c("Stamford", "Westport", "Cheshire", "Sprague")
+colors <- c("lightblue", "lightgreen", "pink", "gold")
+
+# define 2-year intervals
+start_year <- 2001
+end_year <- 2023
+intervals <- seq(start_year, end_year, by = 2)
+interval_labels <- sapply(intervals, function(y) paste0(y, "-", min(y + 1, end_year)))
+
+for (t_index in seq_along(towns)) {
+  town <- towns[t_index]
+  col <- colors[t_index]
+  
+  boxplot_data <- list()
+  valid_labels <- c()
+  
+  for (i in seq_along(intervals)) {
+    y <- intervals[i]
+    years_interval <- y:min(y + 1, end_year)
+    
+    data_subset <- data_clean[data_clean$Town == town &
+                                data_clean$List.Year %in% years_interval, ]
+    
+    # ---- SAFELY FILTER BEFORE TAKING LOG ----
+    raw_vals <- data_subset$Sales.Ratio
+    raw_vals <- raw_vals[is.finite(raw_vals) & raw_vals > 0]
+    interval_values <- log(raw_vals)
+    
+    if (length(interval_values) > 0) {
+      boxplot_data[[length(boxplot_data) + 1]] <- interval_values
+      valid_labels <- c(valid_labels, interval_labels[i])
+    }
+  }
+  
+  if (length(boxplot_data) == 0) {
+    warning(paste("No valid positive Sales.Ratio data for", town))
+    next
+  }
+  
+  y_limits <- range(unlist(boxplot_data))
+  
+  # create JPEG filename
+  jpeg_filename <- paste0(town, "_SalesRatio_LOG_2yr_trend.jpg")
+  
+  # open JPEG device
+  jpeg(
+    filename = jpeg_filename,
+    width = 2000,
+    height = 1000,
+    res = 200,
+    quality = 100
+  )
+  
+  # draw boxplot
+  boxplot(
+    boxplot_data,
+    names = valid_labels,
+    col = col,
+    ylim = y_limits,
+    las = 2,
+    ylab = "log(Sales Ratio)",
+    main = paste("Log Sales Ratio Trends -", town)
+  )
+  
+  dev.off()
+  cat("JPEG created for", town, ":", jpeg_filename, "\n")
+}
+
+
+##############
 
 # geographical heatmap
 locations <- real_estate %>% select("Town", "Assessed.Value", "Sale.Amount", "Sales.Ratio", "Location") %>%

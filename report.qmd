@@ -172,19 +172,23 @@ We constructed a series of boxplots and scatterplots for each of our continuous 
 
 Sales Amounts:
 
-![](images/Cheshire_SaleAmounts_2yr_trend-01.jpg)
+![](images/Cheshire_SaleAmounts_2yr_trend.jpeg)
 
 Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the main quartiles, not really rebounding until the Covid-19 pandemic. It is farther away from major metropolitan areas and the coast, with a smaller population. It appeals to buyers with more modest means.
 
-![](images/Sprague_SaleAmounts_2yr_trend-01.jpg)
+![](images/Sprague_SaleAmounts_2yr_trend.jpeg)
 
 Sprague, the smallest of the towns we chose, displayed more year to year variability and a great deal more market driven variability than larger towns. Part of that is likely due to lower sales volume, and perhaps since it is less prosperous it was a relative bargain and accessible to more buyers.
 
 Assessed Values:
 
-![](images/Cheshire_AssessedValues_2yr_trend.jpeg)
+![](images/Cheshire_AssessedValues_2yr_trend-01.jpg)
 
-![](images/Sprague_AssessedValues_2yr_trend.jpeg)
+The assessments tend to display less year on year variability than the actual sales prices. The IQR remain￼￼ remarkably constant, with the most visible variability in the outlier field. This suggests that for all but the most expensive homes, the assessor is simply following a universal formula to calculate the value of a house. With the most expensive, it could be a different metric that takes in unique features that only wealthier people have, or it could be that fewer of these sales cases more variation by year.
+
+![](images/Sprague_AssessedValues_2yr_trend-01.jpg)
+
+Sprague is an interesting case, because its a relatively poor area with fewer residents. The high assessment variability here can probably be chalked up to fewer units assessed every year. There could also be the opposite issue to the high outliers. The low outliers may be in a uniquely bad condition, each requiring its own consideration.
 
 Sales Ratio:
 
