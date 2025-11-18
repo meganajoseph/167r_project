@@ -14,7 +14,7 @@ number-sections: true
 
 Real estate trends change over the years. The most notable changes have been during the 2008 economic crisis and COVID-19. We decided to investigate real estate in Connecticut, USA to see how it's changed over time and how it differs across cities.
 
-We first clean the data and calculate descriptive statistics. Then, we make graphs of the categorical variables and continuous variables based on the cities we picked. In our advanced analysis, we make heat maps showing the densities of sale price and a multiple linear regression model.
+We first clean the data and calculate descriptive statistics. Then, we make graphs of the categorical variables and continuous variables based on the cities we picked. In our advanced analysis, we make heat maps showing the densities of sale price and a multiple linear regression model with sale price as the response and assessed value and town as the predictors.
 
 # Data
 
@@ -58,11 +58,11 @@ unique(cleaned_real_estate$Property.Type)
 cleaned_real_estate$Sales.Ratio <- as.numeric(cleaned_real_estate$Sales.Ratio)
 ```
 
-The data we used for this analysis is Real Estate Sales data from 2001-2023 from the State of Connecticut's Office of Policy and Management. The sale price of each property is at least \$2,000. Each row is a property which contains information of the town, address, date sold, property type (residential, apartment, commercial, industrial or vacant land), sale price, assessed value, and latitude and longitude coordinates. For the purposes of this analysis, we mainly focus on residential properties and the columns town, property type, sale price, assessed value, and coordinates. Additionally, we picked four cities to focus on: Stamford, Westport, Cheshire, and Sprague. This was done because of the large number of data points and to investigate any differences in towns with varying levels of median income. Westport, CT has the highest median income at \$250,001, then we picked Cheshire, CT at \$150,787 for upper middle, Stamford, CT for lower middle, and Sprague, CT for the lowest. We also wanted to sample towns with different populations and densities. [@Data_Commons].
+The data we used for this analysis is Real Estate Sales data from 2001-2023 from the State of Connecticut's Office of Policy and Management. The sale price of each property is at least \$2,000. Each row is a property which contains information of the town, address, date sold, property type (residential, apartment, commercial, industrial or vacant land), sale price, assessed value, and latitude and longitude coordinates. For the purposes of this analysis, we mainly focus on residential properties and the columns town, property type, sale price, assessed value, and coordinates. Additionally, we picked four cities to focus on: Stamford, Westport, Cheshire, and Sprague. This was done because of the large number of data points and to investigate any differences in towns with varying levels of median income. Westport, CT has the highest median income at \$250,001, then we picked Cheshire, CT at \$150,787 for upper middle, Stamford, CT for lower middle, and Sprague, CT for the lowest [@Data_Commons]. We also wanted to sample towns with different populations and densities.
 
 ## Data Cleaning
 
-Many of the data points were missing or were empty characters, so we dropped those rows. Since our goal is centered on residential properties, we filtered out rows that were not residential. Additionally, the Sales.Ratio column needed to be transformed into a numeric value.
+Many of the data points were missing or were empty characters, so we dropped those rows. Any duplicate rows were also dropped. Since our goal is centered on residential properties, we filtered out rows that were not residential. Additionally, the Sales.Ratio column needed to be transformed into a numeric value.
 
 ## Descriptive Statistics
 
@@ -105,7 +105,7 @@ third_quantile_sr <- quantile(cleaned_real_estate$Sales.Ratio, probs = 0.75)
 ```
 
 | Column | Mean | Minimum | Maximum | 1st Quartile | Median | 3rd Quartile |
-|----|----|----|----|----|----|----|
+|-----------|-----------|-----------|-----------|-----------|-----------|-----------|
 | Sale Amount | `r signif(mean_sp, digits=2)` | `r min_sp` | `r max_sp` | `r round(first_quantile_sp, 2)` | `r round(median_sp, 2)` | `r round(third_quantile_sp, 2)` |
 | Assessed Value | `r signif(mean_av, digits=2)` | `r min_av` | `r signif(max_av, 2)` | `r signif(first_quantile_av, digits=2)` | `r signif(median_av, digits=2)` | `r signif(third_quantile_av, digits=2)` |
 | Sales Ratio | `r round(mean_sr, 2)` | `r min_sr` | `r round(max_sr, 2)` | `r round(first_quantile_sr, 2)` | `r round(median_sr, 2)` | `r round(third_quantile_sr, 2)` |
@@ -148,13 +148,13 @@ Since Stamford is a big city with a large population, it makes sense for it to h
 
 ### Box Plots By Town
 
-We constructed a series of boxplots and scatterplots for each of our continuous variables (sale price, assessed value, and sales ratio), and then repeating this step for each of the four towns selected (Stamford, Westport, Cheshire, and Sprague). We decided that aligning biannual boxplots vertically and then sorting them in time order would demonstrate trends over time in a more effective manner.
+We constructed a series of boxplots and scatterplots for each of our continuous variables (sale price, assessed value, and sales ratio), and then repeated this step for each of the four towns selected (Stamford, Westport, Cheshire, and Sprague). We decided that aligning biannual boxplots vertically and then sorting them in time order would demonstrate trends over time in a more effective manner.
 
 Sales Amounts:
 
 ![](images/Cheshire_SaleAmounts_2yr_trend.jpeg)
 
-Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the main quartiles, not really rebounding until the COVID-19 pandemic. It is farther away from major metropolitan areas and the coast, with a smaller population. It appeals to buyers with more modest means.
+Prices in Cheshire seemed to slump for longer after 2008, both in the outlier spread and the main quartiles, not really rebounding until the COVID-19 pandemic. It is farther away from major metropolitan areas and the coast with a smaller population. It appeals to buyers with more modest means.
 
 ![](images/Sprague_SaleAmounts_2yr_trend.jpeg)
 
@@ -164,7 +164,7 @@ Assessed Values:
 
 ![](images/Cheshire_AssessedValues_2yr_trend-01.jpg)
 
-The assessments tend to display less year on year variability than the actual sales prices. The IQR remains remarkably constant, with the most visible variability in the outlier field. This suggests that for all but the most expensive homes, the assessor is simply following a universal formula to calculate the value of a house. With the most expensive, it could be a different metric that takes in unique features that only wealthier people have, or it could be that fewer of these sales cases more variation by year.
+The assessments tend to display less year on year variability than the actual sales prices. The IQR remains remarkably constant, with the most visible variability in the outlier field. This suggests that for all but the most expensive homes, the assessor is simply following a universal formula to calculate the value of a house. With the most expensive, it could be a different metric that takes in unique features that only wealthier people have, or it could be that fewer of these sales cause more variation by year.
 
 ![](images/Sprague_AssessedValues_2yr_trend-01.jpg)
 
@@ -194,7 +194,7 @@ ggplot(ratio_df, aes(x = List.Year, y = mean_sr_ingroup, color = Town)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
-@fig-ratio-plot Westport is a wealthy town with high property values, and Cheshire is an upper-middle-class town. Stamford is a urban city where near NYC and its economy is closely related to NYC. Sprague is a small town with lower-middle-income. In general, the well-off towns (Westport/Cheshire/Stamford) experience smaller sales ratios during the 2008 financial crisis. The less economically developed town (Hartford) and the NYC-dependent-economic-structure town (Stamford) experience greater market volatility. Considering the time-lag factor, during the 2007–2008 subprime mortgage crisis, housing prices plummeted, causing the ASR in many towns to rise rapidly, even faster than the speed of assessment adjustments. After 2009, the ASR in most towns declined because the real estate market began to recover, and housing prices increased faster than the assessment values. During the global pandemic in 2020, the ASR of all four towns showed a significant downward trend, reflecting a surge in housing prices caused by the extremely low mortgage interest rates and the increase in housing demand driven by the work-from-home trend.
+Westport is a wealthy town with high property values, and Cheshire is an upper-middle-class town. Stamford is a urban city near NYC and its economy is closely related to NYC. Sprague is a small town with lower-middle-income. In general, @fig-ratio-plot shows that the well-off towns (Westport/Cheshire/Stamford) experience smaller sales ratios during the 2008 financial crisis. The less economically developed town (Sprague) and the NYC-dependent-economic-structure town (Stamford) experience greater market volatility. Considering the time-lag factor, during the 2007–2008 subprime mortgage crisis, housing prices plummeted, causing the ASR in many towns to rise rapidly, even faster than the speed of assessment adjustments. After 2009, the ASR in most towns declined because the real estate market began to recover, and housing prices increased faster than the assessment values. During the global pandemic in 2020, the ASR of all four towns showed a significant downward trend, reflecting a surge in housing prices caused by the extremely low mortgage interest rates and the increase in housing demand driven by the work-from-home trend.
 
 # Advanced Analysis
 
@@ -282,13 +282,13 @@ sf + ch
 
 \newpage
 
-To understand whether the relationship between assessed value and sale amount differs across towns, we applied a regression model and the t-test to find out whether the assessed value is correlated with the sale amount and whether this relationship differs across towns.
+To understand whether the relationship between assessed value and sale amount differs across towns, we applied a transformed multiple regression model and  t-test.
 
 Because the population sizes and income levels differ across the four selected towns, we applied a log transformation to both Sale Amount and Assessed Value to make the data fit better and look clearer in the plots. This is the our model: $$
 log(Sale.Amount)=β_0+β_1*log(Assessed.Value)+β_2*Town+β_3*[log(Assessed.Value)×Town]+ε
-$$Here: $β_0$, the intercept, is the expected log sale price in the reference town (Cheshire) when the log(assessed value) is 0, holding all other variables constant. $β_1$, the coefficient of log(Assessed.Value), represents that each additional 1% increase in assessed value is associated with an average percent increase in sale price in Cheshire, holding all other variables constant. $β_2$, the set of coefficients, represents the intercept difference between each individual town (Sprague, Stamford, Westport) and Cheshire. $β_3$, the set of coefficients, represents the difference in effect of assessed value on sale price across individual towns (Sprague, Stamford, Westport) compared to Cheshire. $ε$ is the error term.
+$$Here, $β_0$, the intercept, is the expected log sale price in the reference town (Cheshire) when the log(assessed value) is 0, holding all other variables constant. $β_1$, the coefficient of log(Assessed.Value), represents the average percent increase in sale price in Cheshire for each additional 1% increase in assessed value, holding all other variables constant. $β_2$, the set of coefficients, represents the intercept difference between each individual town (Sprague, Stamford, Westport) and Cheshire. $β_3$, the set of coefficients, represents the difference in effect of assessed value on sale price across individual towns (Sprague, Stamford, Westport) compared to Cheshire. $ε$ is the error term.
 
-To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread decreases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
+To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information from, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the sale price increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread decreases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, and the right tail falls above the expected quantiles. This indicates residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
 
 ```{r}
 #| echo: false
@@ -356,7 +356,7 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
   facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
 ```
 
-@fig-scatter-plot shows that the assessed value is positively correlated with the sale amount in all four towns. In Cheshire, for each additional percentage increase in assessed value, the expected sale amount will increase by 0.745%. The interaction term shows that compared with Cheshire, the slope of the assessed value and the expected sale amount in Sprague ($β$ =0.047，p = 0.384 \> 0.05) and Stamford ($β$ = -0.004, p = 0.742 \> 0.05) is similar. The relationship is stronger in Westport ($β$ = 0.153, p \< 0.001), showing that the expected sale amount in Westport tends to change more than in the other towns when assessed value changes. In general, the model fits the data well ($R^2$ = 0.68).Because the equal variance assumption is violated, its explanatory power is limited. The access value and the town can only explain part of the difference in sale amount, and other factors (policy, house area, etc.) may have an influence.
+@fig-scatter-plot shows that the assessed value is positively correlated with the sale amount in all four towns. In Cheshire, for each additional percentage increase in assessed value, the expected sale amount will increase by 0.745%. The interaction term shows that, compared with Cheshire, the slope of the assessed value and the expected sale amount in Sprague ($β$ =0.047，p = 0.384 \> 0.05) and Stamford ($β$ = -0.004, p = 0.742 \> 0.05) is similar. The relationship is stronger in Westport ($β$ = 0.153, p \< 0.001), showing that the expected sale amount in Westport tends to change more than in the other towns when assessed value changes. In general, the model fits the data well ($R^2$ = 0.68). Because the equal variance assumption is violated, its explanatory power is limited. The assessed value and the town can only explain part of the difference in sale amount, and other factors (policy, house area, etc.) may have an influence.
 
 # Conclusion
 
