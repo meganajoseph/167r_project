@@ -361,4 +361,20 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
 
 # Conclusion
 
+Overall, our analysis of four towns in Connecticut shows
+that the real estate markets don’t change randomly, but are strongly
+dependent on the overall economic circumstances. The differences in
+geographic location, city size, and level of economic development among
+cities also led to different market responses during the 2008 economic
+crisis and COVID-19. Our plots and models highlight these patterns and
+help clarify how the market evolves over the long run. In the future, we
+could try regrouping different areas by similar patterns using a
+different approach. This might reveal relationships across regions that
+don’t show up in our basic summary statistics. We can also consider
+other socioeconomic variables, such as education levels and median
+household income, to better explain differences in the real estate
+market. A more thorough study of outlier data may also be interesting
+for several reasons. For instance, it could perhaps reveal unfair or
+inconsistent assessment values.
+
 # References
