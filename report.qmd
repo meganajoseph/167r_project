@@ -288,7 +288,7 @@ Because the population sizes and income levels differ across the four selecte
 log(Sale.Amount)=β_0+β_1*log(Assessed.Value)+β_2*Town+β_3*[log(Assessed.Value)×Town]+ε
 $$Here: $β_0$, the intercept, is the expected log sale price in the reference town (Cheshire) when the log(assessed value) is 0, holding all other variables constant. $β_1$, the coefficient of log(Assessed.Value), represents that each additional 1% increase in assessed value is associated with an average percent increase in sale price in Cheshire, holding all other variables constant. $β_2$, the set of coefficients, represents the intercept difference between each individual town (Sprague, Stamford, Westport) and Cheshire. $β_3$, the set of coefficients, represents the difference in effect of assessed value on sale price across individual towns (Sprague, Stamford, Westport) compared to Cheshire. $ε$ is the error term.
 
-To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread increases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
+To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread decreases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
 
 ```{r}
 #| echo: false
@@ -303,14 +303,14 @@ mod_fitted <- fitted(SS_model_log)
 ggp3 <- ggplot(data.frame(residual = mod_residuals), aes(sample = residual)) +
   geom_qq() +
   geom_qq_line() +
-  labs(title = "Quantile-quantile plot of residuals",
+  labs(title = "Quantile-Quantile Plot",
        x = "Theoretical quantile (Normal distribution)",
        y = "Sample quantile")
 
 #residual histogram
 ggp4<- ggplot(data = NULL, aes(x = residuals(SS_model_log))) +
   geom_histogram(bins = 30, fill = "lightyellow", color = "black", alpha = 0.7) +
-  labs(title = "residual histogram",
+  labs(title = "Residual Histogram",
        x = "residual",
        y = "frequency")
 
@@ -331,7 +331,7 @@ ggp5 <- ggplot(resid_dataframe, aes(x = time,y = resid))+
 ggp6 <- ggplot(resid_dataframe, aes(x = fittedvalue,y = resid))+
   geom_point() +
   geom_hline(yintercept = 0) +
-  labs( title = "Residual vs. fitted value",
+  labs( title = "Residual vs. Fitted Value",
         x = "Fitted value",
         y = "Residual value")
 
@@ -356,7 +356,7 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
   facet_wrap(~ Town, nrow = NULL, ncol = NULL, scales = "fixed")
 ```
 
-@fig-scatter-plot shows that the assessed value is positively correlated with the sale amount in all four towns. In Cheshire, for each additional percentage increase in assessed value, the expected sale amount will increase by 0.745%. The interaction term shows that compared with Cheshire, the slope of the assessed value and the expected sale amount in Sprague (β =0.047，p = 0.384 \> 0.05) and Stamford (β = -0.004, p = 0.742 \> 0.05) is similar. The relationship is stronger in Westport (β = 0.153, p \< 0.001), showing that the expected sale amount in Westport tends to change more than in the other towns when assessed value changes. In general, the model fits the data well ($R^2$ = 0.68).Because the equal variance assumption is violated, its explanatory power is limited. The access value and the town can only explain part of the difference in sale amount, and other factors (policy, house area, etc.) may have an influence.
+@fig-scatter-plot shows that the assessed value is positively correlated with the sale amount in all four towns. In Cheshire, for each additional percentage increase in assessed value, the expected sale amount will increase by 0.745%. The interaction term shows that compared with Cheshire, the slope of the assessed value and the expected sale amount in Sprague ($β$ =0.047，p = 0.384 \> 0.05) and Stamford ($β$ = -0.004, p = 0.742 \> 0.05) is similar. The relationship is stronger in Westport ($β$ = 0.153, p \< 0.001), showing that the expected sale amount in Westport tends to change more than in the other towns when assessed value changes. In general, the model fits the data well ($R^2$ = 0.68).Because the equal variance assumption is violated, its explanatory power is limited. The access value and the town can only explain part of the difference in sale amount, and other factors (policy, house area, etc.) may have an influence.
 
 # Conclusion
 
