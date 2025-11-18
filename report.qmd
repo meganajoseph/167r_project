@@ -288,7 +288,7 @@ Because the population sizes and income levels differ across the four selecte
 log(Sale.Amount)=β_0+β_1*log(Assessed.Value)+β_2*Town+β_3*[log(Assessed.Value)×Town]+ε
 $$Here: $β_0$, the intercept, is the expected log sale price in the reference town (Cheshire) when the log(assessed value) is 0, holding all other variables constant. $β_1$, the coefficient of log(Assessed.Value), represents that each additional 1% increase in assessed value is associated with an average percent increase in sale price in Cheshire, holding all other variables constant. $β_2$, the set of coefficients, represents the intercept difference between each individual town (Sprague, Stamford, Westport) and Cheshire. $β_3$, the set of coefficients, represents the difference in effect of assessed value on sale price across individual towns (Sprague, Stamford, Westport) compared to Cheshire. $ε$ is the error term.
 
-To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread increases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
+To ensure valid inference (@fig-assumption-plots), we need to meet these four assumptions: **Linearity**: The original scatter plots are messy and hard to get useful information before, so we applied a log transformation in the regression model. After transformation, the plot shows that the variables are linearly correlated; the number of sale amount increases as the assessed value increases in general. **Independence of error**: The Residual vs Time plot shows that most of the residuals are aligned with the reference line. It indicates that most of the errors are independent. **Equal Variance of error**: The Residual vs fitted plot shows that as the fitted value increases, the residuals form a cone shape, and the spread decreases with the fitted value. The equal variance assumption is violated. Because the four towns we chose differ in the estate market, and the sale amount and the assessed value vary, the variances are not constant.Therefore, the validity of t-tests may be affected. **Normality of error**: The QQ plot indicates that half of the residuals closely align with the reference line, and the left tail falls below the expected quantiles, as well as the right tail falls above the expected quantiles. This indicates the residual non-normality. The Residual histogram shows that the residual distribution is approximately normal, and there is a strong peak around 0, and both tails are spread. Together with the QQ plot, the pattern indicates that the normality assumption is not fully satisfied.
 
 ```{r}
 #| echo: false
@@ -360,20 +360,6 @@ ggplot(cleaned_real_estate, aes(x = log(Assessed.Value), y = log(Sale.Amount), c
 
 # Conclusion
 
-Overall, our analysis of four towns in Connecticut shows
-that the real estate markets don’t change randomly, but are strongly
-dependent on the overall economic circumstances. The differences in
-geographic location, city size, and level of economic development among
-cities also led to different market responses during the 2008 economic
-crisis and COVID-19. Our plots and models highlight these patterns and
-help clarify how the market evolves over the long run. In the future, we
-could try regrouping different areas by similar patterns using a
-different approach. This might reveal relationships across regions that
-don’t show up in our basic summary statistics. We can also consider
-other socioeconomic variables, such as education levels and median
-household income, to better explain differences in the real estate
-market. A more thorough study of outlier data may also be interesting
-for several reasons. For instance, it could perhaps reveal unfair or
-inconsistent assessment values.
+Overall, our analysis of four towns in Connecticut shows that the real estate markets don’t change randomly, but are strongly dependent on the overall economic circumstances. The differences in geographic location, city size, and level of economic development among cities also led to different market responses during the 2008 economic crisis and COVID-19. Our plots and models highlight these patterns and help clarify how the market evolves over the long run. In the future, we could try regrouping different areas by similar patterns using a different approach. This might reveal relationships across regions that don’t show up in our basic summary statistics. We can also consider other socioeconomic variables, such as education levels and median household income, to better explain differences in the real estate market. A more thorough study of outlier data may also be interesting for several reasons. For instance, it could perhaps reveal unfair or inconsistent assessment values.
 
 # References
