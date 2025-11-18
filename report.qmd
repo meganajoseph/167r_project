@@ -4,7 +4,6 @@ author: "Siling Guo, Megan Joseph, John Sawicz"
 thanks: "Project repository available at: [https://github.com/meganajoseph/167r_project](https://github.com/meganajoseph/167r_project)."
 date: today
 date-format: long
-abstract: ""
 format: pdf
 editor: visual
 bibliography: references.bib
